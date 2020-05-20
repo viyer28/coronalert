@@ -1,14 +1,14 @@
-module Styles.Dark exposing (style)
+module Styles.Dark exposing (styleWithAttr)
 
 import LngLat exposing (LngLat)
 import Mapbox.Expression as E exposing (false, float, str, true)
-import Mapbox.Layer as Layer
-import Mapbox.Source as Source
+import Mapbox.Layer as Layer exposing (Layer)
+import Mapbox.Source as Source exposing (Source)
 import Mapbox.Style as Style exposing (Style(..))
 
 
-style : Style
-style =
+styleWithAttr : Source -> Layer -> Style
+styleWithAttr source layer =
     Style
         { transition = Style.defaultTransition
         , light = Style.defaultLight
@@ -2879,8 +2879,9 @@ style =
                 , Layer.textFont (E.strings [ "DIN Offc Pro Medium", "Arial Unicode MS Regular" ])
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 1) [ ( 1, float 10 ), ( 6, float 24 ) ])
                 ]
+            , layer
             ]
-        , sources = [ Source.vectorFromUrl "composite" "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7" ]
+        , sources = [ Source.vectorFromUrl "composite" "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7", source ]
         , misc =
             [ Style.sprite "mapbox://sprites/mapbox/dark-v9"
             , Style.glyphs "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
