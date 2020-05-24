@@ -4,7 +4,7 @@
   "description": "find out about the state of coronavirus near you",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "parcel build index.html"
   },
   "repository": {
     "type": "git",
@@ -18,7 +18,12 @@
   },
   "homepage": "https://github.com/viyer28/coronalert#readme",
   "devDependencies": {
+    "cssnano": "^4.1.10",
     "elm-hot": "^1.1.4",
-    "node-elm-compiler": "^5.0.4"
+    "node-elm-compiler": "^5.0.4",
+    "parcel-bundler": "^1.12.4"
+  },
+  "dependencies": {
+    "elm-mapbox": "^4.1.0"
   }
 }

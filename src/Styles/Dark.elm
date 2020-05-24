@@ -7,8 +7,8 @@ import Mapbox.Source as Source exposing (Source)
 import Mapbox.Style as Style exposing (Style(..))
 
 
-styleWithAttr : Source -> Layer -> Style
-styleWithAttr source layer =
+styleWithAttr : List Source -> List Layer -> Style
+styleWithAttr sources layers =
     Style
         { transition = Style.defaultTransition
         , light = Style.defaultLight
@@ -2879,9 +2879,8 @@ styleWithAttr source layer =
                 , Layer.textFont (E.strings [ "DIN Offc Pro Medium", "Arial Unicode MS Regular" ])
                 , Layer.textSize (E.zoom |> E.interpolate (E.Exponential 1) [ ( 1, float 10 ), ( 6, float 24 ) ])
                 ]
-            , layer
-            ]
-        , sources = [ Source.vectorFromUrl "composite" "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7", source ]
+            ] ++ layers
+        , sources = Source.vectorFromUrl "composite" "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7" :: sources
         , misc =
             [ Style.sprite "mapbox://sprites/mapbox/dark-v9"
             , Style.glyphs "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
