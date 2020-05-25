@@ -1,4 +1,4 @@
-module Main exposing (main, redExpr)
+port module Main exposing (main, redExpr)
 
 import Browser
 import Element exposing (..)
@@ -110,6 +110,15 @@ type alias FeatureEntry =
     { geometry : GeometryEntry
     , properties : PropertiesEntry
     , layer : LayerEntry
+    }
+
+
+type alias WriteEntry =
+    { phoneNumber : String
+    , country : String
+    , province : String
+    , county : Maybe String
+    , id : String
     }
 
 
@@ -274,7 +283,22 @@ update msg model =
 
         AlertMe ->
             ( { model | validPhone = Just (validNumber model.phoneNumber) }
-            , Cmd.none
+            , if validNumber model.phoneNumber then
+                case model.clickedEntry of
+                    Nothing ->
+                        Cmd.none
+
+                    Just entry ->
+                        firebaseWrite
+                            { phoneNumber = model.phoneNumber
+                            , country = entry.properties.country
+                            , province = entry.properties.province
+                            , county = entry.properties.county
+                            , id = entry.layer.id
+                            }
+
+              else
+                Cmd.none
             )
 
 
@@ -1217,3 +1241,10 @@ yellowExpr =
 greenExpr : Expr.Expression Expr.DataExpression Expr.Color
 greenExpr =
     Expr.rgba 126 249 255 1
+
+
+
+-- Ports
+
+
+port firebaseWrite : WriteEntry -> Cmd msg
