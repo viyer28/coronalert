@@ -29,6 +29,7 @@ app.ports.firebaseWrite.subscribe(function (data) {
         county: data.county,
         province: data.province,
       }),
+      latest: data.id,
     }, { merge: true });
   } else if (data.id == "states") {
     phoneRef.set({
@@ -36,6 +37,7 @@ app.ports.firebaseWrite.subscribe(function (data) {
         country: data.country,
         state: data.province,
       }),
+      latest: data.id,
     }, { merge: true });
   } else if (data.id == "countries") {
     phoneRef.set({
@@ -43,6 +45,7 @@ app.ports.firebaseWrite.subscribe(function (data) {
         country: data.country,
         state: data.province,
       }),
+      latest: data.id,
     }, { merge: true });
   }
 

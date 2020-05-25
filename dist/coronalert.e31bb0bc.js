@@ -55589,7 +55589,8 @@ app.ports.firebaseWrite.subscribe(function (data) {
       counties: firebase.firestore.FieldValue.arrayUnion({
         county: data.county,
         province: data.province
-      })
+      }),
+      latest: data.id
     }, {
       merge: true
     });
@@ -55598,7 +55599,8 @@ app.ports.firebaseWrite.subscribe(function (data) {
       states: firebase.firestore.FieldValue.arrayUnion({
         country: data.country,
         state: data.province
-      })
+      }),
+      latest: data.id
     }, {
       merge: true
     });
@@ -55607,7 +55609,8 @@ app.ports.firebaseWrite.subscribe(function (data) {
       countries: firebase.firestore.FieldValue.arrayUnion({
         country: data.country,
         state: data.province
-      })
+      }),
+      latest: data.id
     }, {
       merge: true
     });
