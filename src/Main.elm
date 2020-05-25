@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Main exposing (main, redExpr)
 
 import Browser
 import Element exposing (..)
@@ -202,6 +202,7 @@ update msg model =
                     ( { model
                         | clickedFeature = Nothing
                         , clickedEntry = Nothing
+                        , validPhone = Nothing
                       }
                     , Cmd.none
                     )
@@ -223,6 +224,7 @@ update msg model =
                             ( { model
                                 | clickedFeature = Just feat
                                 , clickedEntry = Nothing
+                                , validPhone = Nothing
                               }
                             , Cmd.none
                             )
@@ -240,6 +242,7 @@ update msg model =
                     ( { model
                         | clickedFeature = Nothing
                         , clickedEntry = Nothing
+                        , validPhone = Nothing
                       }
                     , Cmd.none
                     )
@@ -261,6 +264,7 @@ update msg model =
                             ( { model
                                 | clickedFeature = Just feat
                                 , clickedEntry = Nothing
+                                , validPhone = Nothing
                               }
                             , Cmd.none
                             )
@@ -280,6 +284,7 @@ flyIn model feat entry lngLat =
         ( { model
             | clickedFeature = Just feat
             , clickedEntry = Just entry
+            , validPhone = Nothing
           }
         , MapCommands.flyTo
             [ Opt.center lngLat
@@ -293,6 +298,7 @@ flyIn model feat entry lngLat =
         ( { model
             | clickedFeature = Just feat
             , clickedEntry = Just entry
+            , validPhone = Nothing
           }
         , MapCommands.flyTo
             [ Opt.center lngLat
@@ -306,6 +312,7 @@ flyIn model feat entry lngLat =
         ( { model
             | clickedFeature = Just feat
             , clickedEntry = Just entry
+            , validPhone = Nothing
           }
         , MapCommands.flyTo
             [ Opt.center lngLat
@@ -465,13 +472,13 @@ hoverView hoverPoint hoveredEntry =
                         , Element.el
                             [ Font.color
                                 (if properties.confirmed <= 1000 then
-                                    Element.rgb (126 / 255) (249 / 255) (255 / 255)
+                                    green
 
                                  else if properties.confirmed <= 10000 then
-                                    Element.rgb (250 / 255) (218 / 255) (94 / 255)
+                                    yellow
 
                                  else
-                                    Element.rgb (254 / 255) (127 / 255) (156 / 255)
+                                    red
                                 )
                             , Font.size 11
                             , Font.regular
@@ -548,7 +555,7 @@ clickView phoneNum validPhone entry =
                     [ spacing 5
                     , centerX
                     ]
-                    [ Element.el
+                    ([ Element.el
                         [ Font.color (Element.rgb 1 1 1)
                         , Font.size 36
                         , Font.bold
@@ -558,7 +565,7 @@ clickView phoneNum validPhone entry =
                         , height shrink
                         ]
                         (Element.text title)
-                    , Element.el
+                     , Element.el
                         [ Font.color (Element.rgb 1 1 1)
                         , Font.size 24
                         , Font.light
@@ -568,7 +575,7 @@ clickView phoneNum validPhone entry =
                         , height shrink
                         ]
                         (Element.text subtitle)
-                    , Element.column
+                     , Element.column
                         [ centerX
                         , padding 5
                         , spacing 3
@@ -578,13 +585,13 @@ clickView phoneNum validPhone entry =
                         [ Element.el
                             [ Font.color
                                 (if properties.confirmed <= 1000 then
-                                    Element.rgb (126 / 255) (249 / 255) (255 / 255)
+                                    green
 
                                  else if properties.confirmed <= 10000 then
-                                    Element.rgb (250 / 255) (218 / 255) (94 / 255)
+                                    yellow
 
                                  else
-                                    Element.rgb (254 / 255) (127 / 255) (156 / 255)
+                                    red
                                 )
                             , Font.size 32
                             , Font.regular
@@ -600,12 +607,7 @@ clickView phoneNum validPhone entry =
                                 Element.text (String.fromInt properties.confirmed ++ " cases")
                             )
                         , Element.el
-                            [ Font.color
-                                (Element.rgb
-                                    (254 / 255)
-                                    (127 / 255)
-                                    (156 / 255)
-                                )
+                            [ Font.color red
                             , Font.size 28
                             , Font.regular
                             , Font.center
@@ -620,108 +622,200 @@ clickView phoneNum validPhone entry =
                                 Element.text (String.fromInt properties.deaths ++ " deaths")
                             )
                         ]
-                    , Element.el
-                        [ padding 5
-                        , centerX
-                        ]
-                        (let
-                            formatted =
-                                if phoneNum == "" then
-                                    ""
-
-                                else if String.length phoneNum < 3 then
-                                    "(" ++ phoneNum
-
-                                else if String.length phoneNum < 6 then
-                                    "(" ++ String.slice 0 3 phoneNum ++ ") " ++ String.slice 3 6 phoneNum
-
-                                else if String.length phoneNum <= 10 then
-                                    "(" ++ String.slice 0 3 phoneNum ++ ") " ++ String.slice 3 6 phoneNum ++ "-" ++ String.slice 6 10 phoneNum
-
-                                else
-                                    phoneNum
-                         in
-                         Input.text
-                            [ centerX
-                            , Background.color (Element.rgb 1 1 1)
-                            , width (px 300)
-                            , height (px 50)
-                            , Font.alignLeft
-                            , Border.rounded 15
-                            , onEnter AlertMe
-                            ]
-                            { label =
-                                Input.labelAbove
-                                    [ Font.size 14
-                                    , Font.color (Element.rgb 1 1 1)
-                                    , centerX
-                                    , padding 5
-                                    ]
-                                    (Element.text "Enter your phone number for text updates")
-                            , onChange =
-                                \new ->
-                                    if
-                                        (String.right 1 new == ")")
-                                            || (String.right 1 new == "-")
-                                            || (String.length (String.filter Char.isDigit new) > 10)
-                                    then
-                                        PhoneUpdate (String.dropRight 1 (String.filter Char.isDigit new))
-
-                                    else
-                                        PhoneUpdate (String.filter Char.isDigit new)
-                            , placeholder =
-                                Just (Input.placeholder [] (Element.text "(___) ___-____"))
-                            , text = formatted
-                            }
-                        )
-                    , Element.el
-                        [ Font.size 14
-                        , Font.color (Element.rgb255 255 0 120)
-                        , centerX
-                        ]
-                        (case validPhone of
-                            Just False ->
-                                Element.text "Oops, that's not a phone number. Try again!"
-
-                            _ ->
-                                Element.none
-                        )
-                    , Element.el
-                        [ padding 5
-                        , centerX
-                        ]
-                        (Input.button
-                            [ Background.color
-                                (Element.rgb 0 (120 / 255) (255 / 255))
-                            , width (px 300)
-                            , height (px 50)
-                            , Border.rounded 15
-                            , padding 10
-                            , Font.center
-                            , Border.shadow
-                                { offset = ( 0, 1 )
-                                , size = 4
-                                , blur = 20
-                                , color = Element.rgb 0.1 0.1 0.1
-                                }
-                            ]
-                            { onPress = Just AlertMe
-                            , label =
-                                Element.el
-                                    [ Font.size 18
-                                    , Font.color
-                                        (Element.rgb 1 1 1)
-                                    , centerX
-                                    , centerY
-                                    , width shrink
-                                    , height shrink
-                                    , Font.extraLight
-                                    ]
-                                    (Element.text "Alert Me")
-                            }
-                        )
-                    ]
+                     ]
+                        ++ textView phoneNum validPhone properties title
+                    )
                 )
+
+
+textView : String -> Maybe Bool -> PropertiesEntry -> String -> List (Element Msg)
+textView phoneNum validPhone properties title =
+    case validPhone of
+        Just True ->
+            let
+                shareUrl =
+                    "https://twitter.com/intent/tweet?url=http%3A%2F%2Fwww.coronalert.live&text="
+                        ++ String.fromInt properties.confirmed
+                        ++ "%20cases%2C%20"
+                        ++ String.fromInt properties.deaths
+                        ++ "%20deaths%20in%20"
+                        ++ String.replace " " "%20" title
+                        ++ ".%20Stay%20safe%2C%20stay%20alert%21&hashtags=COVID%2C%20coronavirus"
+            in
+            [ Element.el
+                [ paddingEach { top = 15, bottom = 5, left = 5, right = 5 }
+                , centerX
+                , centerY
+                ]
+                (Element.el
+                    [ Font.center
+                    , Font.color (Element.rgb 1 1 1)
+                    , Font.size 14
+                    , centerX
+                    , centerY
+                    ]
+                    (Element.text "Check your phone for a confirmation text")
+                )
+            , Element.el
+                [ padding 5
+                , centerX
+                , centerY
+                , Background.color (Element.rgb255 28 28 30)
+                , width (px 325)
+                , height (px 50)
+                , Border.rounded 15
+                ]
+                (Element.el
+                    [ Font.center
+                    , Font.bold
+                    , Font.color green
+                    , centerX
+                    , centerY
+                    ]
+                    (Element.text "Subscribed ✓")
+                )
+            , Element.el
+                [ Font.size 14
+                , centerX
+                ]
+                Element.none
+            , Element.el
+                [ padding 5
+                , centerX
+                ]
+                (Element.newTabLink
+                    [ Background.color blue
+                    , width (px 325)
+                    , height (px 50)
+                    , Border.rounded 15
+                    , padding 10
+                    , Font.center
+                    , Border.shadow
+                        { offset = ( 0, 1 )
+                        , size = 4
+                        , blur = 20
+                        , color = Element.rgb 0.1 0.1 0.1
+                        }
+                    ]
+                    { url = shareUrl
+                    , label =
+                        Element.el
+                            [ Font.size 18
+                            , Font.color
+                                (Element.rgb 1 1 1)
+                            , centerX
+                            , centerY
+                            , width shrink
+                            , height shrink
+                            , Font.extraLight
+                            ]
+                            (Element.text "Share to Twitter")
+                    }
+                )
+            ]
+
+        _ ->
+            [ Element.el
+                [ padding 5
+                , centerX
+                ]
+                (let
+                    formatted =
+                        if phoneNum == "" then
+                            ""
+
+                        else if String.length phoneNum < 3 then
+                            "(" ++ phoneNum
+
+                        else if String.length phoneNum < 6 then
+                            "(" ++ String.slice 0 3 phoneNum ++ ") " ++ String.slice 3 6 phoneNum
+
+                        else if String.length phoneNum <= 10 then
+                            "(" ++ String.slice 0 3 phoneNum ++ ") " ++ String.slice 3 6 phoneNum ++ " - " ++ String.slice 6 10 phoneNum
+
+                        else
+                            phoneNum
+                 in
+                 Input.text
+                    [ centerX
+                    , Background.color (Element.rgb 1 1 1)
+                    , width (px 325)
+                    , height (px 50)
+                    , Font.alignLeft
+                    , Border.rounded 15
+                    , onEnter AlertMe
+                    ]
+                    { label =
+                        Input.labelAbove
+                            [ Font.size 14
+                            , Font.color (Element.rgb 1 1 1)
+                            , centerX
+                            , padding 5
+                            , Font.center
+                            ]
+                            (Element.text "Enter your phone number for text updates")
+                    , onChange =
+                        \new ->
+                            if
+                                (String.right 1 new == ")")
+                                    || (String.right 1 new == "-")
+                                    || (String.length (String.filter Char.isDigit new) > 10)
+                            then
+                                PhoneUpdate (String.dropRight 1 (String.filter Char.isDigit new))
+
+                            else
+                                PhoneUpdate (String.filter Char.isDigit new)
+                    , placeholder =
+                        Just (Input.placeholder [] (Element.text "(___) ___ - ____"))
+                    , text = formatted
+                    }
+                )
+            , Element.el
+                [ Font.size 14
+                , Font.color red
+                , centerX
+                ]
+                (case validPhone of
+                    Just False ->
+                        Element.text "Oops, that's not a phone number. Try again!"
+
+                    _ ->
+                        Element.none
+                )
+            , Element.el
+                [ padding 5
+                , centerX
+                ]
+                (Input.button
+                    [ Background.color blue
+                    , width (px 325)
+                    , height (px 50)
+                    , Border.rounded 15
+                    , padding 10
+                    , Font.center
+                    , Border.shadow
+                        { offset = ( 0, 1 )
+                        , size = 4
+                        , blur = 20
+                        , color = Element.rgb 0.1 0.1 0.1
+                        }
+                    ]
+                    { onPress = Just AlertMe
+                    , label =
+                        Element.el
+                            [ Font.size 18
+                            , Font.color
+                                (Element.rgb 1 1 1)
+                            , centerX
+                            , centerY
+                            , width shrink
+                            , height shrink
+                            , Font.extraLight
+                            ]
+                            (Element.text ("Alert me on " ++ title))
+                    }
+                )
+            ]
 
 
 
@@ -876,15 +970,15 @@ featureColor =
         [ ( Expr.lessThanOrEqual
                 (Expr.getProperty (Expr.str "confirmed"))
                 (Expr.float 1000)
-          , Expr.rgba 126 249 255 1
+          , greenExpr
           )
         , ( Expr.lessThanOrEqual
                 (Expr.getProperty (Expr.str "confirmed"))
                 (Expr.float 10000)
-          , Expr.rgba 250 218 94 1
+          , yellowExpr
           )
         ]
-        (Expr.rgba 254 127 156 1)
+        redExpr
 
 
 hoverFeature : Maybe E.Value -> MapboxAttr msg
@@ -1084,3 +1178,42 @@ layerDecoder =
     D.map
         LayerEntry
         (D.field "id" D.string)
+
+
+
+-- COLORS
+
+
+red : Element.Color
+red =
+    Element.rgb255 254 127 156
+
+
+yellow : Element.Color
+yellow =
+    Element.rgb255 250 218 94
+
+
+blue : Element.Color
+blue =
+    Element.rgb255 10 132 255
+
+
+green : Element.Color
+green =
+    Element.rgb255 126 249 255
+
+
+redExpr : Expr.Expression Expr.DataExpression Expr.Color
+redExpr =
+    Expr.rgba 254 127 156 1
+
+
+yellowExpr : Expr.Expression Expr.DataExpression Expr.Color
+yellowExpr =
+    Expr.rgba 250 218 94 1
+
+
+greenExpr : Expr.Expression Expr.DataExpression Expr.Color
+greenExpr =
+    Expr.rgba 126 249 255 1
