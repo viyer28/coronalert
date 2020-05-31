@@ -6,7 +6,7 @@ require("firebase/firestore");
 
 const token = "pk.eyJ1Ijoic3BvdHRpeWVyIiwiYSI6ImNqZmQyZnVkejIwbGgyd29iZnR3bGVvMXUifQ.fVrLRiLoyIoPfAGm5ozmMg";
 
-var stripe = Stripe('pk_test_hI9CLE0DJNGtVAjyEMOuxOEo00oJHkeoFd');
+var stripe = Stripe('pk_live_p5afHJ20fpbPORRrAdHXRfyq00c6LKjfF3');
 
 registerCustomElement({ token: token });
 var app = Elm.Main.init({ node: document.body });
@@ -66,7 +66,7 @@ app.ports.processPremium.subscribe(function (data) {
     lineItems: [{
       // Define the product and price in the Dashboard first, and use the price
       // ID in your client-side code.
-      price: 'price_HMhwHCSHwnhdzw',
+      price: 'price_HNSRH0HxhZfHOO',
       quantity: 1
     }],
     mode: 'payment',
