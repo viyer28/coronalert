@@ -57605,6 +57605,12 @@ var app = _Main.Elm.Main.init({
 });
 
 (0, _elmMapbox.registerPorts)(app);
+
+input.onfocus = function () {
+  window.scrollTo(0, 0);
+  document.body.scrollTop = 0;
+};
+
 firebase.initializeApp({
   apiKey: 'AIzaSyD4rtRUXeVy8jXJzVR7PKP986sunn7jef4',
   authDomain: 'coronalert-a5911.firebaseapp.com',
