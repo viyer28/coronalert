@@ -492,8 +492,18 @@ update msg model =
 
 
 flyIn : Model -> FeatureEntry -> LngLat -> ( Model, Cmd msg )
-flyIn model entry lngLat =
+flyIn model entry coords =
     if entry.layer.id == "countries" then
+        let
+            lngLat =
+                if model.device.class == Phone then
+                    { lng = coords.lng
+                    , lat = coords.lat - 5
+                    }
+
+                else
+                    coords
+        in
         ( { model
             | clickedEntry = Just entry
             , validPhone = Nothing
@@ -507,6 +517,16 @@ flyIn model entry lngLat =
         )
 
     else if entry.layer.id == "states" then
+        let
+            lngLat =
+                if model.device.class == Phone then
+                    { lng = coords.lng
+                    , lat = coords.lat - 1
+                    }
+
+                else
+                    coords
+        in
         ( { model
             | clickedEntry = Just entry
             , validPhone = Nothing
@@ -520,6 +540,16 @@ flyIn model entry lngLat =
         )
 
     else
+        let
+            lngLat =
+                if model.device.class == Phone then
+                    { lng = coords.lng
+                    , lat = coords.lat - 0.075
+                    }
+
+                else
+                    coords
+        in
         ( { model
             | clickedEntry = Just entry
             , validPhone = Nothing
@@ -1722,7 +1752,7 @@ clickView mobile phoneNum validPhone invalidSub entry =
                     ++ (if mobile then
                             [ centerX
                             , alignBottom
-                            , moveUp 25
+                            , moveUp 50
                             , scale 0.8
                             ]
 

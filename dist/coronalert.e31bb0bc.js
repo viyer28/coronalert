@@ -12282,50 +12282,61 @@ var $gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom = A2(
 	$elm$json$Json$Encode$float,
 	$gampleman$elm_mapbox$Mapbox$Cmd$Internal$Option('zoom'));
 var $author$project$Main$flyIn = F3(
-	function (model, entry, lngLat) {
-		return (entry.layer.id === 'countries') ? _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					clickedEntry: $elm$core$Maybe$Just(entry),
-					validPhone: $elm$core$Maybe$Nothing
-				}),
-			$author$project$MapCommands$flyTo(
-				_List_fromArray(
-					[
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$center(lngLat),
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$duration(2000),
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(4),
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$animate(true)
-					]))) : ((entry.layer.id === 'states') ? _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					clickedEntry: $elm$core$Maybe$Just(entry),
-					validPhone: $elm$core$Maybe$Nothing
-				}),
-			$author$project$MapCommands$flyTo(
-				_List_fromArray(
-					[
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$center(lngLat),
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$duration(2000),
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(6),
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$animate(true)
-					]))) : _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					clickedEntry: $elm$core$Maybe$Just(entry),
-					validPhone: $elm$core$Maybe$Nothing
-				}),
-			$author$project$MapCommands$flyTo(
-				_List_fromArray(
-					[
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$center(lngLat),
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$duration(2000),
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(10),
-						$gampleman$elm_mapbox$Mapbox$Cmd$Option$animate(true)
-					]))));
+	function (model, entry, coords) {
+		if (entry.layer.id === 'countries') {
+			var lngLat = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? {lat: coords.lat - 5, lng: coords.lng} : coords;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						clickedEntry: $elm$core$Maybe$Just(entry),
+						validPhone: $elm$core$Maybe$Nothing
+					}),
+				$author$project$MapCommands$flyTo(
+					_List_fromArray(
+						[
+							$gampleman$elm_mapbox$Mapbox$Cmd$Option$center(lngLat),
+							$gampleman$elm_mapbox$Mapbox$Cmd$Option$duration(2000),
+							$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(4),
+							$gampleman$elm_mapbox$Mapbox$Cmd$Option$animate(true)
+						])));
+		} else {
+			if (entry.layer.id === 'states') {
+				var lngLat = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? {lat: coords.lat - 1, lng: coords.lng} : coords;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							clickedEntry: $elm$core$Maybe$Just(entry),
+							validPhone: $elm$core$Maybe$Nothing
+						}),
+					$author$project$MapCommands$flyTo(
+						_List_fromArray(
+							[
+								$gampleman$elm_mapbox$Mapbox$Cmd$Option$center(lngLat),
+								$gampleman$elm_mapbox$Mapbox$Cmd$Option$duration(2000),
+								$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(6),
+								$gampleman$elm_mapbox$Mapbox$Cmd$Option$animate(true)
+							])));
+			} else {
+				var lngLat = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? {lat: coords.lat - 0.075, lng: coords.lng} : coords;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							clickedEntry: $elm$core$Maybe$Just(entry),
+							validPhone: $elm$core$Maybe$Nothing
+						}),
+					$author$project$MapCommands$flyTo(
+						_List_fromArray(
+							[
+								$gampleman$elm_mapbox$Mapbox$Cmd$Option$center(lngLat),
+								$gampleman$elm_mapbox$Mapbox$Cmd$Option$duration(2000),
+								$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(10),
+								$gampleman$elm_mapbox$Mapbox$Cmd$Option$animate(true)
+							])));
+			}
+		}
 	});
 var $elm$core$List$head = function (list) {
 	if (list.b) {
@@ -20197,7 +20208,7 @@ var $author$project$Main$clickView = F5(
 						[
 							$mdgriffith$elm_ui$Element$centerX,
 							$mdgriffith$elm_ui$Element$alignBottom,
-							$mdgriffith$elm_ui$Element$moveUp(25),
+							$mdgriffith$elm_ui$Element$moveUp(50),
 							$mdgriffith$elm_ui$Element$scale(0.8)
 						]) : _List_fromArray(
 						[
