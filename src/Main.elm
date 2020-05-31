@@ -1,6 +1,7 @@
-port module Main exposing (main, redExpr)
+port module Main exposing (main)
 
 import Browser
+import Browser.Events as Ev
 import Browser.Navigation as Nav
 import Element exposing (..)
 import Element.Background as Background
@@ -29,7 +30,7 @@ import Styles.Dark as Dark
 import Url
 
 
-main : Program () Model Msg
+main : Program Flags Model Msg
 main =
     Browser.application
         { init = init
@@ -63,6 +64,7 @@ type alias Model =
     , premiumSuccess : Bool
     , key : Nav.Key
     , url : Url.Url
+    , device : Device
     }
 
 
@@ -81,6 +83,7 @@ type Msg
     | UrlChanged Url.Url
     | ExitPremium
     | InvalidSubscribe Bool
+    | SetScreenSize Int Int
     | Noop
 
 
@@ -155,12 +158,18 @@ type alias PremiumEntry =
     }
 
 
+type alias Flags =
+    { height : Int
+    , width : Int
+    }
+
+
 
 -- INIT
 
 
-init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init _ url key =
+init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url key =
     let
         displayPremium =
             String.contains "premium" url.path
@@ -192,6 +201,11 @@ init _ url key =
       , premiumSuccess = success
       , key = key
       , url = url
+      , device =
+            Element.classifyDevice
+                { height = flags.height
+                , width = flags.width
+                }
       }
     , Cmd.batch
         ([ getLatestCountyData
@@ -213,7 +227,10 @@ init _ url key =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    invalidSubscription InvalidSubscribe
+    Sub.batch
+        [ invalidSubscription InvalidSubscribe
+        , Ev.onResize (\values -> SetScreenSize values)
+        ]
 
 
 
@@ -459,6 +476,16 @@ update msg model =
             , Cmd.none
             )
 
+        SetScreenSize x y ->
+            let
+                device =
+                    Element.classifyDevice
+                        { width = x
+                        , height = y
+                        }
+            in
+            ( { model | device = device }, Cmd.none )
+
         Noop ->
             ( model, Cmd.none )
 
@@ -628,9 +655,22 @@ idToFeature id =
 
 view : Model -> Browser.Document Msg
 view model =
+    let
+        noHoverOption =
+            if model.device.class == Phone || model.device.class == Tablet then
+                [ noHover ]
+
+            else
+                []
+
+        isMobile =
+            model.device.class == Phone
+    in
     { title = "Coronalert | The COVID Map with Text Alerts"
     , body =
-        [ Element.layout []
+        [ Element.layoutWith
+            { options = noHoverOption }
+            []
             (column
                 [ height fill
                 , width fill
@@ -644,7 +684,8 @@ view model =
                         (clickView model.phoneNumber model.validPhone model.invalidSub model.clickedEntry)
                     , Element.inFront
                         actions
-                    , Element.inFront (header model.search model.searchResults)
+                    , Element.inFront
+                        (header isMobile model.search model.searchResults)
                     , Element.inFront
                         (premium
                             model.displayPremium
@@ -662,147 +703,161 @@ view model =
     }
 
 
-header : String -> List IdRecordEntry -> Element Msg
-header searchTerm searchResults =
+header : Bool -> String -> List IdRecordEntry -> Element Msg
+header mobile searchTerm searchResults =
     let
         searchDisplay =
             List.take 5 searchResults
+
+        constraints =
+            if mobile then
+                [ centerX
+                , scale 0.8
+                , alignTop
+                , moveDown 25
+                ]
+
+            else
+                [ alignLeft
+                , moveRight 25
+                , alignTop
+                , moveDown 25
+                ]
     in
-    Element.column
-        [ width shrink
-        , height shrink
-        , alignLeft
-        , moveRight 25
-        , alignTop
-        , moveDown 25
-        , spacing 13
-        ]
-        [ Element.column
-            [ width (px 385)
+    Element.el
+        constraints
+        (Element.column
+            [ width shrink
             , height shrink
-            , centerX
-            , spacing 10
-            , Background.color (Element.rgb 0 0 0)
-            , Border.shadow
-                { offset = ( 0, 1 )
-                , size = 4
-                , blur = 15
-                , color = Element.rgb 0.1 0.1 0.1
-                }
-            , Border.rounded 25
-            , padding 25
+            , spacing 13
             ]
-            [ Element.el
-                [ width shrink
+            [ Element.column
+                [ width (px 385)
                 , height shrink
                 , centerX
-                , Font.color (Element.rgb 1 1 1)
-                , Font.size 36
-                , Font.bold
+                , spacing 10
+                , Background.color (Element.rgb 0 0 0)
+                , Border.shadow
+                    { offset = ( 0, 1 )
+                    , size = 4
+                    , blur = 15
+                    , color = Element.rgb 0.1 0.1 0.1
+                    }
+                , Border.rounded 25
+                , padding 25
                 ]
-                (Element.text "Coronalert 🚨")
-            , Element.el
-                [ width shrink
-                , height shrink
-                , centerX
-                , Font.color (Element.rgb 1 1 1)
-                , Font.size 18
-                , Font.light
-                ]
-                (Element.text "The COVID Map with Text Alerts")
-            ]
-        , Element.el
-            [ width fill
-            , height fill
-            , Element.behindContent
-                (Element.el
-                    [ width fill
-                    , height
-                        (px
-                            (List.length searchDisplay
-                                * 40
-                                + 20
-                            )
-                        )
-                    , moveDown 20
-                    , Border.roundEach
-                        { topLeft = 0
-                        , topRight = 0
-                        , bottomLeft = 20
-                        , bottomRight = 20
-                        }
-                    , Border.shadow
-                        { offset = ( 0, 1 )
-                        , size = 4
-                        , blur = 15
-                        , color = Element.rgb 0.1 0.1 0.1
-                        }
-                    , Background.color (Element.rgb255 0 0 0)
-                    , clip
+                [ Element.el
+                    [ width shrink
+                    , height shrink
+                    , centerX
+                    , Font.color (Element.rgb 1 1 1)
+                    , Font.size 36
+                    , Font.bold
                     ]
-                    (Element.column
+                    (Element.text "Coronalert 🚨")
+                , Element.el
+                    [ width shrink
+                    , height shrink
+                    , centerX
+                    , Font.color (Element.rgb 1 1 1)
+                    , Font.size 18
+                    , Font.light
+                    ]
+                    (Element.text "The COVID Map with Text Alerts")
+                ]
+            , Element.el
+                [ width fill
+                , height fill
+                , Element.behindContent
+                    (Element.el
                         [ width fill
-                        , height (px (List.length searchDisplay * 40))
+                        , height
+                            (px
+                                (List.length searchDisplay
+                                    * 40
+                                    + 20
+                                )
+                            )
                         , moveDown 20
+                        , Border.roundEach
+                            { topLeft = 0
+                            , topRight = 0
+                            , bottomLeft = 20
+                            , bottomRight = 20
+                            }
+                        , Border.shadow
+                            { offset = ( 0, 1 )
+                            , size = 4
+                            , blur = 15
+                            , color = Element.rgb 0.1 0.1 0.1
+                            }
+                        , Background.color (Element.rgb255 0 0 0)
+                        , clip
                         ]
-                        (List.map searchEntry searchDisplay)
+                        (Element.column
+                            [ width fill
+                            , height (px (List.length searchDisplay * 40))
+                            , moveDown 20
+                            ]
+                            (List.map searchEntry searchDisplay)
+                        )
                     )
+                ]
+                (Element.row
+                    [ width fill
+                    , height (px 40)
+                    , Border.rounded 20
+                    , Background.color (Element.rgb 0 0 0)
+                    , Border.color (Element.rgb255 58 58 60)
+                    , Border.width 1
+                    , spacing 15
+                    , clip
+                    , mouseOver
+                        [ Background.color
+                            (Element.rgb255 15 15 15)
+                        ]
+                    ]
+                    [ Element.image
+                        [ centerY
+                        , alignLeft
+                        , moveRight 15
+                        , height (px 15)
+                        ]
+                        { src = "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTS3q-vOrSdYJMUqjBY-f4SLffkAQVVXo0jCKUuSaIzIiJi4gro&usqp=CAU"
+                        , description = "search icon"
+                        }
+                    , Input.text
+                        [ centerY
+                        , Font.alignLeft
+                        , height (px 30)
+                        , Background.color (Element.rgba 0 0 0 0)
+                        , width fill
+                        , Border.color (Element.rgba 0 0 0 0)
+                        , Font.size 16
+                        , Font.color (Element.rgb 1 1 1)
+                        , Element.focused [ Border.color (Element.rgba 0 0 0 0) ]
+                        , moveUp 6
+                        , Input.focusedOnLoad
+                        , onEnter
+                            (case List.head searchDisplay of
+                                Nothing ->
+                                    Noop
+
+                                Just entry ->
+                                    ClickSearch entry
+                            )
+                        ]
+                        { label = Input.labelHidden ""
+                        , onChange =
+                            \new -> Search new
+                        , placeholder =
+                            Just (Input.placeholder [ moveUp 6, Font.size 16 ] (Element.text "search a county, state, or country"))
+                        , text = searchTerm
+                        }
+                    ]
                 )
             ]
-            (Element.row
-                [ width fill
-                , height (px 40)
-                , Border.rounded 20
-                , Background.color (Element.rgb 0 0 0)
-                , Border.color (Element.rgb255 58 58 60)
-                , Border.width 1
-                , spacing 15
-                , clip
-                , mouseOver
-                    [ Background.color
-                        (Element.rgb255 15 15 15)
-                    ]
-                ]
-                [ Element.image
-                    [ centerY
-                    , alignLeft
-                    , moveRight 15
-                    , height (px 15)
-                    ]
-                    { src = "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTS3q-vOrSdYJMUqjBY-f4SLffkAQVVXo0jCKUuSaIzIiJi4gro&usqp=CAU"
-                    , description = "search icon"
-                    }
-                , Input.text
-                    [ centerY
-                    , Font.alignLeft
-                    , height (px 30)
-                    , Background.color (Element.rgba 0 0 0 0)
-                    , width fill
-                    , Border.color (Element.rgba 0 0 0 0)
-                    , Font.size 16
-                    , Font.color (Element.rgb 1 1 1)
-                    , Element.focused [ Border.color (Element.rgba 0 0 0 0) ]
-                    , moveUp 6
-                    , Input.focusedOnLoad
-                    , onEnter
-                        (case List.head searchDisplay of
-                            Nothing ->
-                                Noop
-
-                            Just entry ->
-                                ClickSearch entry
-                        )
-                    ]
-                    { label = Input.labelHidden ""
-                    , onChange =
-                        \new -> Search new
-                    , placeholder =
-                        Just (Input.placeholder [ moveUp 6, Font.size 16 ] (Element.text "search a county, state, or country"))
-                    , text = searchTerm
-                    }
-                ]
-            )
-        ]
+        )
 
 
 searchEntry : IdRecordEntry -> Element Msg
@@ -1303,16 +1358,25 @@ premiumFooter success phoneNum validPhone =
 
 map : Model -> Html Msg
 map model =
+    let
+        noHoverOption =
+            if model.device.class == Phone || model.device.class == Tablet then
+                []
+
+            else
+                [ onMouseMove Hover ]
+    in
     div
         [ Html.Attributes.style "height" "100vh" ]
         [ Mapbox.Element.map
-            [ id "my-map"
-            , onMouseMove Hover
-            , onClick Click
-            , onTouchEnd Touch
-            , eventFeaturesLayers [ "counties", "states", "countries" ]
-            , hoverFeature model.hoveredFeature
-            ]
+            ([ id "my-map"
+             , onClick Click
+             , onTouchEnd Touch
+             , eventFeaturesLayers [ "counties", "states", "countries" ]
+             , hoverFeature model.hoveredFeature
+             ]
+                ++ noHoverOption
+            )
             (Dark.styleWithAttr
                 [ Source.geoJSONFromValue "counties"
                     []

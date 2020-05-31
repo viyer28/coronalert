@@ -747,271 +747,6 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
 console.warn('Compiled in DEBUG mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
 
 
-// EQUALITY
-
-function _Utils_eq(x, y)
-{
-	for (
-		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
-		isEqual && (pair = stack.pop());
-		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
-		)
-	{}
-
-	return isEqual;
-}
-
-function _Utils_eqHelp(x, y, depth, stack)
-{
-	if (x === y)
-	{
-		return true;
-	}
-
-	if (typeof x !== 'object' || x === null || y === null)
-	{
-		typeof x === 'function' && _Debug_crash(5);
-		return false;
-	}
-
-	if (depth > 100)
-	{
-		stack.push(_Utils_Tuple2(x,y));
-		return true;
-	}
-
-	/**/
-	if (x.$ === 'Set_elm_builtin')
-	{
-		x = $elm$core$Set$toList(x);
-		y = $elm$core$Set$toList(y);
-	}
-	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	/**_UNUSED/
-	if (x.$ < 0)
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	for (var key in x)
-	{
-		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-var _Utils_equal = F2(_Utils_eq);
-var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
-
-
-
-// COMPARISONS
-
-// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
-// the particular integer values assigned to LT, EQ, and GT.
-
-function _Utils_cmp(x, y, ord)
-{
-	if (typeof x !== 'object')
-	{
-		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
-	}
-
-	/**/
-	if (x instanceof String)
-	{
-		var a = x.valueOf();
-		var b = y.valueOf();
-		return a === b ? 0 : a < b ? -1 : 1;
-	}
-	//*/
-
-	/**_UNUSED/
-	if (typeof x.$ === 'undefined')
-	//*/
-	/**/
-	if (x.$[0] === '#')
-	//*/
-	{
-		return (ord = _Utils_cmp(x.a, y.a))
-			? ord
-			: (ord = _Utils_cmp(x.b, y.b))
-				? ord
-				: _Utils_cmp(x.c, y.c);
-	}
-
-	// traverse conses until end of a list or a mismatch
-	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
-	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
-}
-
-var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
-var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
-var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
-var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
-
-var _Utils_compare = F2(function(x, y)
-{
-	var n = _Utils_cmp(x, y);
-	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
-});
-
-
-// COMMON VALUES
-
-var _Utils_Tuple0_UNUSED = 0;
-var _Utils_Tuple0 = { $: '#0' };
-
-function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
-function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
-
-function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
-function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
-
-function _Utils_chr_UNUSED(c) { return c; }
-function _Utils_chr(c) { return new String(c); }
-
-
-// RECORDS
-
-function _Utils_update(oldRecord, updatedFields)
-{
-	var newRecord = {};
-
-	for (var key in oldRecord)
-	{
-		newRecord[key] = oldRecord[key];
-	}
-
-	for (var key in updatedFields)
-	{
-		newRecord[key] = updatedFields[key];
-	}
-
-	return newRecord;
-}
-
-
-// APPEND
-
-var _Utils_append = F2(_Utils_ap);
-
-function _Utils_ap(xs, ys)
-{
-	// append Strings
-	if (typeof xs === 'string')
-	{
-		return xs + ys;
-	}
-
-	// append Lists
-	if (!xs.b)
-	{
-		return ys;
-	}
-	var root = _List_Cons(xs.a, ys);
-	xs = xs.b
-	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		curr = curr.b = _List_Cons(xs.a, ys);
-	}
-	return root;
-}
-
-
-
-var _List_Nil_UNUSED = { $: 0 };
-var _List_Nil = { $: '[]' };
-
-function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
-function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
-
-
-var _List_cons = F2(_List_Cons);
-
-function _List_fromArray(arr)
-{
-	var out = _List_Nil;
-	for (var i = arr.length; i--; )
-	{
-		out = _List_Cons(arr[i], out);
-	}
-	return out;
-}
-
-function _List_toArray(xs)
-{
-	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		out.push(xs.a);
-	}
-	return out;
-}
-
-var _List_map2 = F3(function(f, xs, ys)
-{
-	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
-	{
-		arr.push(A2(f, xs.a, ys.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map3 = F4(function(f, xs, ys, zs)
-{
-	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A3(f, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map4 = F5(function(f, ws, xs, ys, zs)
-{
-	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
-{
-	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_sortBy = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		return _Utils_cmp(f(a), f(b));
-	}));
-});
-
-var _List_sortWith = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		var ord = A2(f, a, b);
-		return ord === $elm$core$Basics$EQ ? 0 : ord === $elm$core$Basics$LT ? -1 : 1;
-	}));
-});
-
-
-
 var _JsArray_empty = [];
 
 function _JsArray_singleton(value)
@@ -1457,6 +1192,271 @@ function _Debug_regionToString(region)
 	}
 	return 'on lines ' + region.start.line + ' through ' + region.end.line;
 }
+
+
+
+// EQUALITY
+
+function _Utils_eq(x, y)
+{
+	for (
+		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
+		isEqual && (pair = stack.pop());
+		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
+		)
+	{}
+
+	return isEqual;
+}
+
+function _Utils_eqHelp(x, y, depth, stack)
+{
+	if (x === y)
+	{
+		return true;
+	}
+
+	if (typeof x !== 'object' || x === null || y === null)
+	{
+		typeof x === 'function' && _Debug_crash(5);
+		return false;
+	}
+
+	if (depth > 100)
+	{
+		stack.push(_Utils_Tuple2(x,y));
+		return true;
+	}
+
+	/**/
+	if (x.$ === 'Set_elm_builtin')
+	{
+		x = $elm$core$Set$toList(x);
+		y = $elm$core$Set$toList(y);
+	}
+	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	/**_UNUSED/
+	if (x.$ < 0)
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	for (var key in x)
+	{
+		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+var _Utils_equal = F2(_Utils_eq);
+var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
+
+
+
+// COMPARISONS
+
+// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
+// the particular integer values assigned to LT, EQ, and GT.
+
+function _Utils_cmp(x, y, ord)
+{
+	if (typeof x !== 'object')
+	{
+		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
+	}
+
+	/**/
+	if (x instanceof String)
+	{
+		var a = x.valueOf();
+		var b = y.valueOf();
+		return a === b ? 0 : a < b ? -1 : 1;
+	}
+	//*/
+
+	/**_UNUSED/
+	if (typeof x.$ === 'undefined')
+	//*/
+	/**/
+	if (x.$[0] === '#')
+	//*/
+	{
+		return (ord = _Utils_cmp(x.a, y.a))
+			? ord
+			: (ord = _Utils_cmp(x.b, y.b))
+				? ord
+				: _Utils_cmp(x.c, y.c);
+	}
+
+	// traverse conses until end of a list or a mismatch
+	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
+	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
+}
+
+var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
+var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
+var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
+var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
+
+var _Utils_compare = F2(function(x, y)
+{
+	var n = _Utils_cmp(x, y);
+	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
+});
+
+
+// COMMON VALUES
+
+var _Utils_Tuple0_UNUSED = 0;
+var _Utils_Tuple0 = { $: '#0' };
+
+function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
+
+function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
+
+function _Utils_chr_UNUSED(c) { return c; }
+function _Utils_chr(c) { return new String(c); }
+
+
+// RECORDS
+
+function _Utils_update(oldRecord, updatedFields)
+{
+	var newRecord = {};
+
+	for (var key in oldRecord)
+	{
+		newRecord[key] = oldRecord[key];
+	}
+
+	for (var key in updatedFields)
+	{
+		newRecord[key] = updatedFields[key];
+	}
+
+	return newRecord;
+}
+
+
+// APPEND
+
+var _Utils_append = F2(_Utils_ap);
+
+function _Utils_ap(xs, ys)
+{
+	// append Strings
+	if (typeof xs === 'string')
+	{
+		return xs + ys;
+	}
+
+	// append Lists
+	if (!xs.b)
+	{
+		return ys;
+	}
+	var root = _List_Cons(xs.a, ys);
+	xs = xs.b
+	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		curr = curr.b = _List_Cons(xs.a, ys);
+	}
+	return root;
+}
+
+
+
+var _List_Nil_UNUSED = { $: 0 };
+var _List_Nil = { $: '[]' };
+
+function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
+
+
+var _List_cons = F2(_List_Cons);
+
+function _List_fromArray(arr)
+{
+	var out = _List_Nil;
+	for (var i = arr.length; i--; )
+	{
+		out = _List_Cons(arr[i], out);
+	}
+	return out;
+}
+
+function _List_toArray(xs)
+{
+	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		out.push(xs.a);
+	}
+	return out;
+}
+
+var _List_map2 = F3(function(f, xs, ys)
+{
+	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
+	{
+		arr.push(A2(f, xs.a, ys.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map3 = F4(function(f, xs, ys, zs)
+{
+	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A3(f, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map4 = F5(function(f, ws, xs, ys, zs)
+{
+	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
+{
+	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_sortBy = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		return _Utils_cmp(f(a), f(b));
+	}));
+});
+
+var _List_sortWith = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		var ord = A2(f, a, b);
+		return ord === $elm$core$Basics$EQ ? 0 : ord === $elm$core$Basics$LT ? -1 : 1;
+	}));
+});
 
 
 
@@ -5888,10 +5888,31 @@ var $author$project$Main$LinkClicked = function (a) {
 var $author$project$Main$UrlChanged = function (a) {
 	return {$: 'UrlChanged', a: a};
 };
-var $elm$core$Basics$EQ = {$: 'EQ'};
-var $elm$core$Basics$GT = {$: 'GT'};
-var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$List$cons = _List_cons;
+var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
+var $elm$core$Array$foldr = F3(
+	function (func, baseCase, _v0) {
+		var tree = _v0.c;
+		var tail = _v0.d;
+		var helper = F2(
+			function (node, acc) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
+				} else {
+					var values = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
+				}
+			});
+		return A3(
+			$elm$core$Elm$JsArray$foldr,
+			helper,
+			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
+			tree);
+	});
+var $elm$core$Array$toList = function (array) {
+	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
+};
 var $elm$core$Dict$foldr = F3(
 	function (func, acc, t) {
 		foldr:
@@ -5944,30 +5965,9 @@ var $elm$core$Set$toList = function (_v0) {
 	var dict = _v0.a;
 	return $elm$core$Dict$keys(dict);
 };
-var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
-var $elm$core$Array$foldr = F3(
-	function (func, baseCase, _v0) {
-		var tree = _v0.c;
-		var tail = _v0.d;
-		var helper = F2(
-			function (node, acc) {
-				if (node.$ === 'SubTree') {
-					var subTree = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
-				} else {
-					var values = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
-				}
-			});
-		return A3(
-			$elm$core$Elm$JsArray$foldr,
-			helper,
-			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
-			tree);
-	});
-var $elm$core$Array$toList = function (array) {
-	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
-};
+var $elm$core$Basics$EQ = {$: 'EQ'};
+var $elm$core$Basics$GT = {$: 'GT'};
+var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -6363,6 +6363,7 @@ var $elm$core$Result$isOk = function (result) {
 		return false;
 	}
 };
+var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$map = _Json_map1;
 var $elm$json$Json$Decode$map2 = _Json_map2;
 var $elm$json$Json$Decode$succeed = _Json_succeed;
@@ -11486,6 +11487,26 @@ var $elm$core$Basics$never = function (_v0) {
 	}
 };
 var $elm$browser$Browser$application = _Browser_application;
+var $mdgriffith$elm_ui$Element$BigDesktop = {$: 'BigDesktop'};
+var $mdgriffith$elm_ui$Element$Desktop = {$: 'Desktop'};
+var $mdgriffith$elm_ui$Element$Landscape = {$: 'Landscape'};
+var $mdgriffith$elm_ui$Element$Phone = {$: 'Phone'};
+var $mdgriffith$elm_ui$Element$Portrait = {$: 'Portrait'};
+var $mdgriffith$elm_ui$Element$Tablet = {$: 'Tablet'};
+var $elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
+var $mdgriffith$elm_ui$Element$classifyDevice = function (window) {
+	return {
+		_class: function () {
+			var shortSide = A2($elm$core$Basics$min, window.width, window.height);
+			var longSide = A2($elm$core$Basics$max, window.width, window.height);
+			return (shortSide < 600) ? $mdgriffith$elm_ui$Element$Phone : ((longSide <= 1200) ? $mdgriffith$elm_ui$Element$Tablet : (((longSide > 1200) && (longSide <= 1920)) ? $mdgriffith$elm_ui$Element$Desktop : $mdgriffith$elm_ui$Element$BigDesktop));
+		}(),
+		orientation: (_Utils_cmp(window.width, window.height) < 0) ? $mdgriffith$elm_ui$Element$Portrait : $mdgriffith$elm_ui$Element$Landscape
+	};
+};
 var $author$project$Main$firebaseUpgrade = _Platform_outgoingPort('firebaseUpgrade', $elm$json$Json$Encode$string);
 var $author$project$Main$DataReceived = function (a) {
 	return {$: 'DataReceived', a: a};
@@ -11801,17 +11822,37 @@ var $author$project$Main$getLatestWorldData = $elm$http$Http$get(
 		url: $author$project$Main$worldUrl
 	});
 var $author$project$Main$init = F3(
-	function (_v0, url, key) {
+	function (flags, url, key) {
 		var displayPremium = A2($elm$core$String$contains, 'premium', url.path);
-		var _v1 = A2($elm$core$String$startsWith, '/premium/success/', url.path) ? _Utils_Tuple2(
+		var _v0 = A2($elm$core$String$startsWith, '/premium/success/', url.path) ? _Utils_Tuple2(
 			true,
 			A2($elm$core$String$dropLeft, 17, url.path)) : (A2($elm$core$String$startsWith, '/premium/failure/', url.path) ? _Utils_Tuple2(
 			false,
 			A2($elm$core$String$dropLeft, 17, url.path)) : _Utils_Tuple2(false, ''));
-		var success = _v1.a;
-		var phoneNumber = _v1.b;
+		var success = _v0.a;
+		var phoneNumber = _v0.b;
 		return _Utils_Tuple2(
-			{clickedEntry: $elm$core$Maybe$Nothing, counties: _List_Nil, countries: _List_Nil, displayPremium: displayPremium, errorMessage: $elm$core$Maybe$Nothing, hoverPoint: $elm$core$Maybe$Nothing, hoveredEntry: $elm$core$Maybe$Nothing, hoveredFeature: $elm$core$Maybe$Nothing, invalidSub: $elm$core$Maybe$Nothing, key: key, phoneNumber: phoneNumber, premiumSuccess: success, search: '', searchResults: _List_Nil, states: _List_Nil, url: url, validPhone: $elm$core$Maybe$Nothing},
+			{
+				clickedEntry: $elm$core$Maybe$Nothing,
+				counties: _List_Nil,
+				countries: _List_Nil,
+				device: $mdgriffith$elm_ui$Element$classifyDevice(
+					{height: flags.height, width: flags.width}),
+				displayPremium: displayPremium,
+				errorMessage: $elm$core$Maybe$Nothing,
+				hoverPoint: $elm$core$Maybe$Nothing,
+				hoveredEntry: $elm$core$Maybe$Nothing,
+				hoveredFeature: $elm$core$Maybe$Nothing,
+				invalidSub: $elm$core$Maybe$Nothing,
+				key: key,
+				phoneNumber: phoneNumber,
+				premiumSuccess: success,
+				search: '',
+				searchResults: _List_Nil,
+				states: _List_Nil,
+				url: url,
+				validPhone: $elm$core$Maybe$Nothing
+			},
 			$elm$core$Platform$Cmd$batch(
 				_Utils_ap(
 					_List_fromArray(
@@ -11824,10 +11865,208 @@ var $author$project$Main$init = F3(
 var $author$project$Main$InvalidSubscribe = function (a) {
 	return {$: 'InvalidSubscribe', a: a};
 };
+var $author$project$Main$SetScreenSize = F2(
+	function (a, b) {
+		return {$: 'SetScreenSize', a: a, b: b};
+	});
+var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$Main$invalidSubscription = _Platform_incomingPort('invalidSubscription', $elm$json$Json$Decode$bool);
+var $elm$browser$Browser$Events$Window = {$: 'Window'};
+var $elm$browser$Browser$Events$MySub = F3(
+	function (a, b, c) {
+		return {$: 'MySub', a: a, b: b, c: c};
+	});
+var $elm$browser$Browser$Events$State = F2(
+	function (subs, pids) {
+		return {pids: pids, subs: subs};
+	});
+var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
+	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
+var $elm$browser$Browser$Events$nodeToKey = function (node) {
+	if (node.$ === 'Document') {
+		return 'd_';
+	} else {
+		return 'w_';
+	}
+};
+var $elm$browser$Browser$Events$addKey = function (sub) {
+	var node = sub.a;
+	var name = sub.b;
+	return _Utils_Tuple2(
+		_Utils_ap(
+			$elm$browser$Browser$Events$nodeToKey(node),
+			name),
+		sub);
+};
+var $elm$browser$Browser$Events$Event = F2(
+	function (key, event) {
+		return {event: event, key: key};
+	});
+var $elm$browser$Browser$Events$spawn = F3(
+	function (router, key, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var actualNode = function () {
+			if (node.$ === 'Document') {
+				return _Browser_doc;
+			} else {
+				return _Browser_window;
+			}
+		}();
+		return A2(
+			$elm$core$Task$map,
+			function (value) {
+				return _Utils_Tuple2(key, value);
+			},
+			A3(
+				_Browser_on,
+				actualNode,
+				name,
+				function (event) {
+					return A2(
+						$elm$core$Platform$sendToSelf,
+						router,
+						A2($elm$browser$Browser$Events$Event, key, event));
+				}));
+	});
+var $elm$core$Dict$union = F2(
+	function (t1, t2) {
+		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
+	});
+var $elm$browser$Browser$Events$onEffects = F3(
+	function (router, subs, state) {
+		var stepRight = F3(
+			function (key, sub, _v6) {
+				var deads = _v6.a;
+				var lives = _v6.b;
+				var news = _v6.c;
+				return _Utils_Tuple3(
+					deads,
+					lives,
+					A2(
+						$elm$core$List$cons,
+						A3($elm$browser$Browser$Events$spawn, router, key, sub),
+						news));
+			});
+		var stepLeft = F3(
+			function (_v4, pid, _v5) {
+				var deads = _v5.a;
+				var lives = _v5.b;
+				var news = _v5.c;
+				return _Utils_Tuple3(
+					A2($elm$core$List$cons, pid, deads),
+					lives,
+					news);
+			});
+		var stepBoth = F4(
+			function (key, pid, _v2, _v3) {
+				var deads = _v3.a;
+				var lives = _v3.b;
+				var news = _v3.c;
+				return _Utils_Tuple3(
+					deads,
+					A3($elm$core$Dict$insert, key, pid, lives),
+					news);
+			});
+		var newSubs = A2($elm$core$List$map, $elm$browser$Browser$Events$addKey, subs);
+		var _v0 = A6(
+			$elm$core$Dict$merge,
+			stepLeft,
+			stepBoth,
+			stepRight,
+			state.pids,
+			$elm$core$Dict$fromList(newSubs),
+			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
+		var deadPids = _v0.a;
+		var livePids = _v0.b;
+		var makeNewPids = _v0.c;
+		return A2(
+			$elm$core$Task$andThen,
+			function (pids) {
+				return $elm$core$Task$succeed(
+					A2(
+						$elm$browser$Browser$Events$State,
+						newSubs,
+						A2(
+							$elm$core$Dict$union,
+							livePids,
+							$elm$core$Dict$fromList(pids))));
+			},
+			A2(
+				$elm$core$Task$andThen,
+				function (_v1) {
+					return $elm$core$Task$sequence(makeNewPids);
+				},
+				$elm$core$Task$sequence(
+					A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
+	});
+var $elm$browser$Browser$Events$onSelfMsg = F3(
+	function (router, _v0, state) {
+		var key = _v0.key;
+		var event = _v0.event;
+		var toMessage = function (_v2) {
+			var subKey = _v2.a;
+			var _v3 = _v2.b;
+			var node = _v3.a;
+			var name = _v3.b;
+			var decoder = _v3.c;
+			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
+		};
+		var messages = A2($elm$core$List$filterMap, toMessage, state.subs);
+		return A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				return $elm$core$Task$succeed(state);
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$map,
+					$elm$core$Platform$sendToApp(router),
+					messages)));
+	});
+var $elm$browser$Browser$Events$subMap = F2(
+	function (func, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var decoder = _v0.c;
+		return A3(
+			$elm$browser$Browser$Events$MySub,
+			node,
+			name,
+			A2($elm$json$Json$Decode$map, func, decoder));
+	});
+_Platform_effectManagers['Browser.Events'] = _Platform_createManager($elm$browser$Browser$Events$init, $elm$browser$Browser$Events$onEffects, $elm$browser$Browser$Events$onSelfMsg, 0, $elm$browser$Browser$Events$subMap);
+var $elm$browser$Browser$Events$subscription = _Platform_leaf('Browser.Events');
+var $elm$browser$Browser$Events$on = F3(
+	function (node, name, decoder) {
+		return $elm$browser$Browser$Events$subscription(
+			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
+	});
+var $elm$browser$Browser$Events$onResize = function (func) {
+	return A3(
+		$elm$browser$Browser$Events$on,
+		$elm$browser$Browser$Events$Window,
+		'resize',
+		A2(
+			$elm$json$Json$Decode$field,
+			'target',
+			A3(
+				$elm$json$Json$Decode$map2,
+				func,
+				A2($elm$json$Json$Decode$field, 'innerWidth', $elm$json$Json$Decode$int),
+				A2($elm$json$Json$Decode$field, 'innerHeight', $elm$json$Json$Decode$int))));
+};
 var $author$project$Main$subscriptions = function (_v0) {
-	return $author$project$Main$invalidSubscription($author$project$Main$InvalidSubscribe);
+	return $elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				$author$project$Main$invalidSubscription($author$project$Main$InvalidSubscribe),
+				$elm$browser$Browser$Events$onResize(
+				function (values) {
+					return $author$project$Main$SetScreenSize(values);
+				})
+			]));
 };
 var $gampleman$elm_mapbox$LngLat$LngLat = F2(
 	function (lng, lat) {
@@ -12730,6 +12969,16 @@ var $author$project$Main$update = F2(
 							displayPremium: isInvalid,
 							invalidSub: $elm$core$Maybe$Just(isInvalid)
 						}),
+					$elm$core$Platform$Cmd$none);
+			case 'SetScreenSize':
+				var x = msg.a;
+				var y = msg.b;
+				var device = $mdgriffith$elm_ui$Element$classifyDevice(
+					{height: y, width: x});
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{device: device}),
 					$elm$core$Platform$Cmd$none);
 			default:
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -15276,10 +15525,6 @@ var $mdgriffith$elm_ui$Internal$Model$hasSmallCaps = function (typeface) {
 		return false;
 	}
 };
-var $elm$core$Basics$min = F2(
-	function (x, y) {
-		return (_Utils_cmp(x, y) < 0) ? x : y;
-	});
 var $mdgriffith$elm_ui$Internal$Model$renderProps = F3(
 	function (force, _v0, existing) {
 		var key = _v0.a;
@@ -18047,7 +18292,6 @@ var $mdgriffith$elm_ui$Internal$Model$Height = function (a) {
 var $mdgriffith$elm_ui$Element$height = $mdgriffith$elm_ui$Internal$Model$Height;
 var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
 var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
-var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$fail = _Json_fail;
 var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
 	return {$: 'MayPreventDefault', a: a};
@@ -20073,6 +20317,17 @@ var $mdgriffith$elm_ui$Element$row = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
+var $mdgriffith$elm_ui$Internal$Model$Scale = function (a) {
+	return {$: 'Scale', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$scale = $mdgriffith$elm_ui$Internal$Flag$flag(23);
+var $mdgriffith$elm_ui$Element$scale = function (n) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$scale,
+		$mdgriffith$elm_ui$Internal$Model$Scale(
+			_Utils_Tuple3(n, n, 1)));
+};
 var $author$project$Main$searchEntry = function (entry) {
 	return A2(
 		$mdgriffith$elm_ui$Element$Input$button,
@@ -20266,202 +20521,214 @@ var $elm$core$List$take = F2(
 	function (n, list) {
 		return A3($elm$core$List$takeFast, 0, n, list);
 	});
-var $author$project$Main$header = F2(
-	function (searchTerm, searchResults) {
+var $author$project$Main$header = F3(
+	function (mobile, searchTerm, searchResults) {
 		var searchDisplay = A2($elm$core$List$take, 5, searchResults);
+		var constraints = mobile ? _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$centerX,
+				$mdgriffith$elm_ui$Element$scale(0.8),
+				$mdgriffith$elm_ui$Element$alignTop,
+				$mdgriffith$elm_ui$Element$moveDown(25)
+			]) : _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$alignLeft,
+				$mdgriffith$elm_ui$Element$moveRight(25),
+				$mdgriffith$elm_ui$Element$alignTop,
+				$mdgriffith$elm_ui$Element$moveDown(25)
+			]);
 		return A2(
-			$mdgriffith$elm_ui$Element$column,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-					$mdgriffith$elm_ui$Element$alignLeft,
-					$mdgriffith$elm_ui$Element$moveRight(25),
-					$mdgriffith$elm_ui$Element$alignTop,
-					$mdgriffith$elm_ui$Element$moveDown(25),
-					$mdgriffith$elm_ui$Element$spacing(13)
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$column,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(385)),
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-							$mdgriffith$elm_ui$Element$centerX,
-							$mdgriffith$elm_ui$Element$spacing(10),
-							$mdgriffith$elm_ui$Element$Background$color(
-							A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
-							$mdgriffith$elm_ui$Element$Border$shadow(
-							{
-								blur: 15,
-								color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
-								offset: _Utils_Tuple2(0, 1),
-								size: 4
-							}),
-							$mdgriffith$elm_ui$Element$Border$rounded(25),
-							$mdgriffith$elm_ui$Element$padding(25)
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-									$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-									$mdgriffith$elm_ui$Element$centerX,
-									$mdgriffith$elm_ui$Element$Font$color(
-									A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
-									$mdgriffith$elm_ui$Element$Font$size(36),
-									$mdgriffith$elm_ui$Element$Font$bold
-								]),
-							$mdgriffith$elm_ui$Element$text('Coronalert 🚨')),
-							A2(
-							$mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-									$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-									$mdgriffith$elm_ui$Element$centerX,
-									$mdgriffith$elm_ui$Element$Font$color(
-									A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
-									$mdgriffith$elm_ui$Element$Font$size(18),
-									$mdgriffith$elm_ui$Element$Font$light
-								]),
-							$mdgriffith$elm_ui$Element$text('The COVID Map with Text Alerts'))
-						])),
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$behindContent(
-							A2(
+			$mdgriffith$elm_ui$Element$el,
+			constraints,
+			A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+						$mdgriffith$elm_ui$Element$spacing(13)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$px(385)),
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+								$mdgriffith$elm_ui$Element$centerX,
+								$mdgriffith$elm_ui$Element$spacing(10),
+								$mdgriffith$elm_ui$Element$Background$color(
+								A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
+								$mdgriffith$elm_ui$Element$Border$shadow(
+								{
+									blur: 15,
+									color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
+									offset: _Utils_Tuple2(0, 1),
+									size: 4
+								}),
+								$mdgriffith$elm_ui$Element$Border$rounded(25),
+								$mdgriffith$elm_ui$Element$padding(25)
+							]),
+						_List_fromArray(
+							[
+								A2(
 								$mdgriffith$elm_ui$Element$el,
 								_List_fromArray(
 									[
-										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-										$mdgriffith$elm_ui$Element$height(
-										$mdgriffith$elm_ui$Element$px(
-											($elm$core$List$length(searchDisplay) * 40) + 20)),
-										$mdgriffith$elm_ui$Element$moveDown(20),
-										$mdgriffith$elm_ui$Element$Border$roundEach(
-										{bottomLeft: 20, bottomRight: 20, topLeft: 0, topRight: 0}),
-										$mdgriffith$elm_ui$Element$Border$shadow(
-										{
-											blur: 15,
-											color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
-											offset: _Utils_Tuple2(0, 1),
-											size: 4
-										}),
-										$mdgriffith$elm_ui$Element$Background$color(
-										A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0)),
-										$mdgriffith$elm_ui$Element$clip
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+										$mdgriffith$elm_ui$Element$centerX,
+										$mdgriffith$elm_ui$Element$Font$color(
+										A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
+										$mdgriffith$elm_ui$Element$Font$size(36),
+										$mdgriffith$elm_ui$Element$Font$bold
 									]),
+								$mdgriffith$elm_ui$Element$text('Coronalert 🚨')),
 								A2(
-									$mdgriffith$elm_ui$Element$column,
+								$mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+										$mdgriffith$elm_ui$Element$centerX,
+										$mdgriffith$elm_ui$Element$Font$color(
+										A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
+										$mdgriffith$elm_ui$Element$Font$size(18),
+										$mdgriffith$elm_ui$Element$Font$light
+									]),
+								$mdgriffith$elm_ui$Element$text('The COVID Map with Text Alerts'))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$behindContent(
+								A2(
+									$mdgriffith$elm_ui$Element$el,
 									_List_fromArray(
 										[
 											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 											$mdgriffith$elm_ui$Element$height(
 											$mdgriffith$elm_ui$Element$px(
-												$elm$core$List$length(searchDisplay) * 40)),
-											$mdgriffith$elm_ui$Element$moveDown(20)
+												($elm$core$List$length(searchDisplay) * 40) + 20)),
+											$mdgriffith$elm_ui$Element$moveDown(20),
+											$mdgriffith$elm_ui$Element$Border$roundEach(
+											{bottomLeft: 20, bottomRight: 20, topLeft: 0, topRight: 0}),
+											$mdgriffith$elm_ui$Element$Border$shadow(
+											{
+												blur: 15,
+												color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
+												offset: _Utils_Tuple2(0, 1),
+												size: 4
+											}),
+											$mdgriffith$elm_ui$Element$Background$color(
+											A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0)),
+											$mdgriffith$elm_ui$Element$clip
 										]),
-									A2($elm$core$List$map, $author$project$Main$searchEntry, searchDisplay))))
-						]),
-					A2(
-						$mdgriffith$elm_ui$Element$row,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$height(
-								$mdgriffith$elm_ui$Element$px(40)),
-								$mdgriffith$elm_ui$Element$Border$rounded(20),
-								$mdgriffith$elm_ui$Element$Background$color(
-								A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
-								$mdgriffith$elm_ui$Element$Border$color(
-								A3($mdgriffith$elm_ui$Element$rgb255, 58, 58, 60)),
-								$mdgriffith$elm_ui$Element$Border$width(1),
-								$mdgriffith$elm_ui$Element$spacing(15),
-								$mdgriffith$elm_ui$Element$clip,
-								$mdgriffith$elm_ui$Element$mouseOver(
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$Background$color(
-										A3($mdgriffith$elm_ui$Element$rgb255, 15, 15, 15))
-									]))
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$mdgriffith$elm_ui$Element$image,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$centerY,
-										$mdgriffith$elm_ui$Element$alignLeft,
-										$mdgriffith$elm_ui$Element$moveRight(15),
-										$mdgriffith$elm_ui$Element$height(
-										$mdgriffith$elm_ui$Element$px(15))
-									]),
-								{description: 'search icon', src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTS3q-vOrSdYJMUqjBY-f4SLffkAQVVXo0jCKUuSaIzIiJi4gro&usqp=CAU'}),
-								A2(
-								$mdgriffith$elm_ui$Element$Input$text,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$centerY,
-										$mdgriffith$elm_ui$Element$Font$alignLeft,
-										$mdgriffith$elm_ui$Element$height(
-										$mdgriffith$elm_ui$Element$px(30)),
-										$mdgriffith$elm_ui$Element$Background$color(
-										A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
-										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-										$mdgriffith$elm_ui$Element$Border$color(
-										A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
-										$mdgriffith$elm_ui$Element$Font$size(16),
-										$mdgriffith$elm_ui$Element$Font$color(
-										A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
-										$mdgriffith$elm_ui$Element$focused(
+									A2(
+										$mdgriffith$elm_ui$Element$column,
 										_List_fromArray(
 											[
-												$mdgriffith$elm_ui$Element$Border$color(
-												A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0))
-											])),
-										$mdgriffith$elm_ui$Element$moveUp(6),
-										$mdgriffith$elm_ui$Element$Input$focusedOnLoad,
-										$author$project$Main$onEnter(
-										function () {
-											var _v0 = $elm$core$List$head(searchDisplay);
-											if (_v0.$ === 'Nothing') {
-												return $author$project$Main$Noop;
-											} else {
-												var entry = _v0.a;
-												return $author$project$Main$ClickSearch(entry);
-											}
-										}())
-									]),
-								{
-									label: $mdgriffith$elm_ui$Element$Input$labelHidden(''),
-									onChange: function (_new) {
-										return $author$project$Main$Search(_new);
-									},
-									placeholder: $elm$core$Maybe$Just(
-										A2(
-											$mdgriffith$elm_ui$Element$Input$placeholder,
+												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+												$mdgriffith$elm_ui$Element$height(
+												$mdgriffith$elm_ui$Element$px(
+													$elm$core$List$length(searchDisplay) * 40)),
+												$mdgriffith$elm_ui$Element$moveDown(20)
+											]),
+										A2($elm$core$List$map, $author$project$Main$searchEntry, searchDisplay))))
+							]),
+						A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$height(
+									$mdgriffith$elm_ui$Element$px(40)),
+									$mdgriffith$elm_ui$Element$Border$rounded(20),
+									$mdgriffith$elm_ui$Element$Background$color(
+									A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
+									$mdgriffith$elm_ui$Element$Border$color(
+									A3($mdgriffith$elm_ui$Element$rgb255, 58, 58, 60)),
+									$mdgriffith$elm_ui$Element$Border$width(1),
+									$mdgriffith$elm_ui$Element$spacing(15),
+									$mdgriffith$elm_ui$Element$clip,
+									$mdgriffith$elm_ui$Element$mouseOver(
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Background$color(
+											A3($mdgriffith$elm_ui$Element$rgb255, 15, 15, 15))
+										]))
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Element$image,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$centerY,
+											$mdgriffith$elm_ui$Element$alignLeft,
+											$mdgriffith$elm_ui$Element$moveRight(15),
+											$mdgriffith$elm_ui$Element$height(
+											$mdgriffith$elm_ui$Element$px(15))
+										]),
+									{description: 'search icon', src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTS3q-vOrSdYJMUqjBY-f4SLffkAQVVXo0jCKUuSaIzIiJi4gro&usqp=CAU'}),
+									A2(
+									$mdgriffith$elm_ui$Element$Input$text,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$centerY,
+											$mdgriffith$elm_ui$Element$Font$alignLeft,
+											$mdgriffith$elm_ui$Element$height(
+											$mdgriffith$elm_ui$Element$px(30)),
+											$mdgriffith$elm_ui$Element$Background$color(
+											A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+											$mdgriffith$elm_ui$Element$Border$color(
+											A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
+											$mdgriffith$elm_ui$Element$Font$size(16),
+											$mdgriffith$elm_ui$Element$Font$color(
+											A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
+											$mdgriffith$elm_ui$Element$focused(
 											_List_fromArray(
 												[
-													$mdgriffith$elm_ui$Element$moveUp(6),
-													$mdgriffith$elm_ui$Element$Font$size(16)
-												]),
-											$mdgriffith$elm_ui$Element$text('search a county, state, or country'))),
-									text: searchTerm
-								})
-							])))
-				]));
+													$mdgriffith$elm_ui$Element$Border$color(
+													A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0))
+												])),
+											$mdgriffith$elm_ui$Element$moveUp(6),
+											$mdgriffith$elm_ui$Element$Input$focusedOnLoad,
+											$author$project$Main$onEnter(
+											function () {
+												var _v0 = $elm$core$List$head(searchDisplay);
+												if (_v0.$ === 'Nothing') {
+													return $author$project$Main$Noop;
+												} else {
+													var entry = _v0.a;
+													return $author$project$Main$ClickSearch(entry);
+												}
+											}())
+										]),
+									{
+										label: $mdgriffith$elm_ui$Element$Input$labelHidden(''),
+										onChange: function (_new) {
+											return $author$project$Main$Search(_new);
+										},
+										placeholder: $elm$core$Maybe$Just(
+											A2(
+												$mdgriffith$elm_ui$Element$Input$placeholder,
+												_List_fromArray(
+													[
+														$mdgriffith$elm_ui$Element$moveUp(6),
+														$mdgriffith$elm_ui$Element$Font$size(16)
+													]),
+												$mdgriffith$elm_ui$Element$text('search a county, state, or country'))),
+										text: searchTerm
+									})
+								])))
+					])));
 	});
 var $author$project$Main$hoverView = F2(
 	function (hoverPoint, hoveredEntry) {
@@ -20815,8 +21082,6 @@ var $mdgriffith$elm_ui$Element$layoutWith = F3(
 				_Utils_ap($mdgriffith$elm_ui$Internal$Model$rootStyle, attrs)),
 			child);
 	});
-var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
-	{options: _List_Nil});
 var $author$project$Main$Click = function (a) {
 	return {$: 'Click', a: a};
 };
@@ -32047,6 +32312,10 @@ var $author$project$Styles$Dark$styleWithAttr = F2(
 			});
 	});
 var $author$project$Main$map = function (model) {
+	var noHoverOption = (_Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) || _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Tablet)) ? _List_Nil : _List_fromArray(
+		[
+			$gampleman$elm_mapbox$Mapbox$Element$onMouseMove($author$project$Main$Hover)
+		]);
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -32057,17 +32326,18 @@ var $author$project$Main$map = function (model) {
 			[
 				A2(
 				$gampleman$elm_mapbox$Mapbox$Element$map,
-				_List_fromArray(
-					[
-						$gampleman$elm_mapbox$Mapbox$Element$id('my-map'),
-						$gampleman$elm_mapbox$Mapbox$Element$onMouseMove($author$project$Main$Hover),
-						$gampleman$elm_mapbox$Mapbox$Element$onClick($author$project$Main$Click),
-						$gampleman$elm_mapbox$Mapbox$Element$onTouchEnd($author$project$Main$Touch),
-						$gampleman$elm_mapbox$Mapbox$Element$eventFeaturesLayers(
-						_List_fromArray(
-							['counties', 'states', 'countries'])),
-						$author$project$Main$hoverFeature(model.hoveredFeature)
-					]),
+				_Utils_ap(
+					_List_fromArray(
+						[
+							$gampleman$elm_mapbox$Mapbox$Element$id('my-map'),
+							$gampleman$elm_mapbox$Mapbox$Element$onClick($author$project$Main$Click),
+							$gampleman$elm_mapbox$Mapbox$Element$onTouchEnd($author$project$Main$Touch),
+							$gampleman$elm_mapbox$Mapbox$Element$eventFeaturesLayers(
+							_List_fromArray(
+								['counties', 'states', 'countries'])),
+							$author$project$Main$hoverFeature(model.hoveredFeature)
+						]),
+					noHoverOption),
 				A2(
 					$author$project$Styles$Dark$styleWithAttr,
 					_List_fromArray(
@@ -32146,6 +32416,11 @@ var $author$project$Main$map = function (model) {
 						])))
 			]));
 };
+var $mdgriffith$elm_ui$Internal$Model$HoverOption = function (a) {
+	return {$: 'HoverOption', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$NoHover = {$: 'NoHover'};
+var $mdgriffith$elm_ui$Element$noHover = $mdgriffith$elm_ui$Internal$Model$HoverOption($mdgriffith$elm_ui$Internal$Model$NoHover);
 var $author$project$Main$ExitPremium = {$: 'ExitPremium'};
 var $author$project$Main$Upgrade = {$: 'Upgrade'};
 var $author$project$Main$premiumFooter = F3(
@@ -32652,11 +32927,15 @@ var $author$project$Main$premium = F4(
 			$mdgriffith$elm_ui$Element$none) : $mdgriffith$elm_ui$Element$none;
 	});
 var $author$project$Main$view = function (model) {
+	var noHoverOption = (_Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) || _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Tablet)) ? _List_fromArray(
+		[$mdgriffith$elm_ui$Element$noHover]) : _List_Nil;
+	var isMobile = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone);
 	return {
 		body: _List_fromArray(
 			[
-				A2(
-				$mdgriffith$elm_ui$Element$layout,
+				A3(
+				$mdgriffith$elm_ui$Element$layoutWith,
+				{options: noHoverOption},
 				_List_Nil,
 				A2(
 					$mdgriffith$elm_ui$Element$column,
@@ -32680,7 +32959,7 @@ var $author$project$Main$view = function (model) {
 									A4($author$project$Main$clickView, model.phoneNumber, model.validPhone, model.invalidSub, model.clickedEntry)),
 									$mdgriffith$elm_ui$Element$inFront($author$project$Main$actions),
 									$mdgriffith$elm_ui$Element$inFront(
-									A2($author$project$Main$header, model.search, model.searchResults)),
+									A3($author$project$Main$header, isMobile, model.search, model.searchResults)),
 									$mdgriffith$elm_ui$Element$inFront(
 									A4($author$project$Main$premium, model.displayPremium, model.phoneNumber, model.validPhone, model.premiumSuccess)),
 									$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
@@ -32696,7 +32975,18 @@ var $author$project$Main$view = function (model) {
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Main.CoordinatesEntry":{"args":[],"type":"{ latitude : String.String, longitude : String.String }"},"Mapbox.Element.EventData":{"args":[],"type":"{ point : ( Basics.Int, Basics.Int ), lngLat : LngLat.LngLat, renderedFeatures : List.List Json.Decode.Value }"},"Main.IdRecordEntry":{"args":[],"type":"{ id : String.String, regionType : String.String, data : Main.RecordEntry }"},"LngLat.LngLat":{"args":[],"type":"{ lng : Basics.Float, lat : Basics.Float }"},"Main.RecordEntry":{"args":[],"type":"{ country : String.String, province : Maybe.Maybe String.String, county : Maybe.Maybe String.String, updatedAt : String.String, stats : Main.StatsEntry, coordinates : Main.CoordinatesEntry }"},"Main.StatsEntry":{"args":[],"type":"{ confirmed : Basics.Int, deaths : Basics.Int, recovered : Basics.Int }"},"Mapbox.Element.TouchEvent":{"args":[],"type":"{ touches : List.List Mapbox.Element.EventData, center : Mapbox.Element.EventData }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Json.Decode.Value":{"args":[],"type":"Json.Encode.Value"}},"unions":{"Main.Msg":{"args":[],"tags":{"DataReceived":["Result.Result Http.Error (List.List Main.RecordEntry)"],"Hover":["Mapbox.Element.EventData"],"Click":["Mapbox.Element.EventData"],"Touch":["Mapbox.Element.TouchEvent"],"PhoneUpdate":["String.String"],"AlertMe":[],"Search":["String.String"],"ClickSearch":["Main.IdRecordEntry"],"ClickPremium":[],"Upgrade":[],"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"ExitPremium":[],"InvalidSubscribe":["Basics.Bool"],"Noop":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Json.Encode.Value":{"args":[],"tags":{"Value":[]}}}}})}});
+	A2(
+		$elm$json$Json$Decode$andThen,
+		function (width) {
+			return A2(
+				$elm$json$Json$Decode$andThen,
+				function (height) {
+					return $elm$json$Json$Decode$succeed(
+						{height: height, width: width});
+				},
+				A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$int));
+		},
+		A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$int)))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Main.CoordinatesEntry":{"args":[],"type":"{ latitude : String.String, longitude : String.String }"},"Mapbox.Element.EventData":{"args":[],"type":"{ point : ( Basics.Int, Basics.Int ), lngLat : LngLat.LngLat, renderedFeatures : List.List Json.Decode.Value }"},"Main.IdRecordEntry":{"args":[],"type":"{ id : String.String, regionType : String.String, data : Main.RecordEntry }"},"LngLat.LngLat":{"args":[],"type":"{ lng : Basics.Float, lat : Basics.Float }"},"Main.RecordEntry":{"args":[],"type":"{ country : String.String, province : Maybe.Maybe String.String, county : Maybe.Maybe String.String, updatedAt : String.String, stats : Main.StatsEntry, coordinates : Main.CoordinatesEntry }"},"Main.StatsEntry":{"args":[],"type":"{ confirmed : Basics.Int, deaths : Basics.Int, recovered : Basics.Int }"},"Mapbox.Element.TouchEvent":{"args":[],"type":"{ touches : List.List Mapbox.Element.EventData, center : Mapbox.Element.EventData }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Json.Decode.Value":{"args":[],"type":"Json.Encode.Value"}},"unions":{"Main.Msg":{"args":[],"tags":{"DataReceived":["Result.Result Http.Error (List.List Main.RecordEntry)"],"Hover":["Mapbox.Element.EventData"],"Click":["Mapbox.Element.EventData"],"Touch":["Mapbox.Element.TouchEvent"],"PhoneUpdate":["String.String"],"AlertMe":[],"Search":["String.String"],"ClickSearch":["Main.IdRecordEntry"],"ClickPremium":[],"Upgrade":[],"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"ExitPremium":[],"InvalidSubscribe":["Basics.Bool"],"SetScreenSize":["Basics.Int","Basics.Int"],"Noop":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Json.Encode.Value":{"args":[],"tags":{"Value":[]}}}}})}});
 
 //////////////////// HMR BEGIN ////////////////////
 
@@ -57178,7 +57468,11 @@ var stripe = Stripe('pk_live_p5afHJ20fpbPORRrAdHXRfyq00c6LKjfF3');
 });
 
 var app = _Main.Elm.Main.init({
-  node: document.body
+  node: document.body,
+  flags: {
+    height: window.innerHeight,
+    width: window.innerWidth
+  }
 });
 
 (0, _elmMapbox.registerPorts)(app);
