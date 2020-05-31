@@ -521,12 +521,18 @@ recordToId region record =
         "counties" ->
             case record.province of
                 Nothing ->
-                    Debug.todo "recordToId: invalid county"
+                    { id = ""
+                    , regionType = region
+                    , data = record
+                    }
 
                 Just state ->
                     case record.county of
                         Nothing ->
-                            Debug.todo "recordToId: invalid county"
+                            { id = ""
+                            , regionType = region
+                            , data = record
+                            }
 
                         Just county ->
                             { id = county ++ " County, " ++ state
@@ -537,7 +543,10 @@ recordToId region record =
         "states" ->
             case record.province of
                 Nothing ->
-                    Debug.todo "recordToId: invalid state"
+                    { id = ""
+                    , regionType = region
+                    , data = record
+                    }
 
                 Just state ->
                     { id = state ++ ", " ++ record.country
@@ -560,7 +569,10 @@ recordToId region record =
                     }
 
         _ ->
-            Debug.todo "recordToId: invalid region"
+            { id = ""
+            , regionType = region
+            , data = record
+            }
 
 
 idsToRecords : List IdRecordEntry -> List RecordEntry

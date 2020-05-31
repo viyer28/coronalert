@@ -12146,29 +12146,18 @@ var $author$project$Main$processPremium = _Platform_outgoingPort(
 				]));
 	});
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
-var $elm$core$Debug$todo = _Debug_todo;
 var $author$project$Main$recordToId = F2(
 	function (region, record) {
 		switch (region) {
 			case 'counties':
 				var _v1 = record.province;
 				if (_v1.$ === 'Nothing') {
-					return _Debug_todo(
-						'Main',
-						{
-							start: {line: 524, column: 21},
-							end: {line: 524, column: 31}
-						})('recordToId: invalid county');
+					return {data: record, id: '', regionType: region};
 				} else {
 					var state = _v1.a;
 					var _v2 = record.county;
 					if (_v2.$ === 'Nothing') {
-						return _Debug_todo(
-							'Main',
-							{
-								start: {line: 529, column: 29},
-								end: {line: 529, column: 39}
-							})('recordToId: invalid county');
+						return {data: record, id: '', regionType: region};
 					} else {
 						var county = _v2.a;
 						return {data: record, id: county + (' County, ' + state), regionType: region};
@@ -12177,12 +12166,7 @@ var $author$project$Main$recordToId = F2(
 			case 'states':
 				var _v3 = record.province;
 				if (_v3.$ === 'Nothing') {
-					return _Debug_todo(
-						'Main',
-						{
-							start: {line: 540, column: 21},
-							end: {line: 540, column: 31}
-						})('recordToId: invalid state');
+					return {data: record, id: '', regionType: region};
 				} else {
 					var state = _v3.a;
 					return {data: record, id: state + (', ' + record.country), regionType: region};
@@ -12196,12 +12180,7 @@ var $author$project$Main$recordToId = F2(
 					return {data: record, id: province + (', ' + record.country), regionType: region};
 				}
 			default:
-				return _Debug_todo(
-					'Main',
-					{
-						start: {line: 563, column: 13},
-						end: {line: 563, column: 23}
-					})('recordToId: invalid region');
+				return {data: record, id: '', regionType: region};
 		}
 	});
 var $elm$core$List$sortBy = _List_sortBy;
