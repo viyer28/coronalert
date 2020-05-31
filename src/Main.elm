@@ -66,6 +66,8 @@ type alias Model =
     , key : Nav.Key
     , url : Url.Url
     , device : Device
+    , width : Int
+    , height : Int
     }
 
 
@@ -207,6 +209,8 @@ init flags url key =
                 { height = flags.height
                 , width = flags.width
                 }
+      , height = flags.height
+      , width = flags.width
       }
     , Cmd.batch
         ([ getLatestCountyData
@@ -485,7 +489,7 @@ update msg model =
                         , height = y
                         }
             in
-            ( { model | device = device }, Cmd.none )
+            ( { model | device = device, width = x, height = y }, Cmd.none )
 
         Noop ->
             ( model, Cmd.none )
@@ -703,8 +707,8 @@ view model =
             { options = noHoverOption }
             []
             (column
-                [ height fill
-                , width fill
+                [ height (px model.height)
+                , width (px model.width)
                 , centerX
                 , Background.color (Element.rgb 0 0 0)
                 ]

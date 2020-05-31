@@ -11840,6 +11840,7 @@ var $author$project$Main$init = F3(
 					{height: flags.height, width: flags.width}),
 				displayPremium: displayPremium,
 				errorMessage: $elm$core$Maybe$Nothing,
+				height: flags.height,
 				hoverPoint: $elm$core$Maybe$Nothing,
 				hoveredEntry: $elm$core$Maybe$Nothing,
 				hoveredFeature: $elm$core$Maybe$Nothing,
@@ -11851,7 +11852,8 @@ var $author$project$Main$init = F3(
 				searchResults: _List_Nil,
 				states: _List_Nil,
 				url: url,
-				validPhone: $elm$core$Maybe$Nothing
+				validPhone: $elm$core$Maybe$Nothing,
+				width: flags.width
 			},
 			$elm$core$Platform$Cmd$batch(
 				_Utils_ap(
@@ -12989,7 +12991,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{device: device}),
+						{device: device, height: y, width: x}),
 					$elm$core$Platform$Cmd$none);
 			default:
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -33160,8 +33162,10 @@ var $author$project$Main$view = function (model) {
 					$mdgriffith$elm_ui$Element$column,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(model.height)),
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$px(model.width)),
 							$mdgriffith$elm_ui$Element$centerX,
 							$mdgriffith$elm_ui$Element$Background$color(
 							A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0))
