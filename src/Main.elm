@@ -713,7 +713,7 @@ header mobile searchTerm searchResults =
             if mobile then
                 [ centerX
                 , alignTop
-                , moveDown 25
+                , moveDown 10
                 ]
 
             else
@@ -728,36 +728,30 @@ header mobile searchTerm searchResults =
         (Element.column
             ([ width shrink
              , height shrink
+             , spacing 13
              ]
                 ++ (if mobile then
-                        [ spacing 8 ]
+                        [ scale 0.8 ]
 
                     else
-                        [ spacing 13 ]
+                        []
                    )
             )
             [ Element.column
-                ([ width (px 385)
-                 , height shrink
-                 , centerX
-                 , spacing 10
-                 , Background.color (Element.rgb 0 0 0)
-                 , Border.shadow
+                [ width (px 385)
+                , height shrink
+                , centerX
+                , spacing 10
+                , Background.color (Element.rgb 0 0 0)
+                , Border.shadow
                     { offset = ( 0, 1 )
                     , size = 4
                     , blur = 15
                     , color = Element.rgb 0.1 0.1 0.1
                     }
-                 , Border.rounded 25
-                 , padding 25
-                 ]
-                    ++ (if mobile then
-                            [ scale 0.9 ]
-
-                        else
-                            []
-                       )
-                )
+                , Border.rounded 25
+                , padding 25
+                ]
                 [ Element.el
                     [ width shrink
                     , height shrink
@@ -778,7 +772,8 @@ header mobile searchTerm searchResults =
                     (Element.text "The COVID Map with Text Alerts")
                 ]
             , Element.el
-                ([ height fill
+                ([ width fill
+                 , height fill
                  , Element.behindContent
                     (Element.el
                         [ width fill
@@ -820,7 +815,7 @@ header mobile searchTerm searchResults =
                             ]
 
                         else
-                            [ width fill ]
+                            []
                        )
                 )
                 (Element.row
