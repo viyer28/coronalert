@@ -6,6 +6,8 @@ require("firebase/firestore");
 
 const token = "pk.eyJ1Ijoic3BvdHRpeWVyIiwiYSI6ImNqZmQyZnVkejIwbGgyd29iZnR3bGVvMXUifQ.fVrLRiLoyIoPfAGm5ozmMg";
 
+var stripe = Stripe('pk_test_hI9CLE0DJNGtVAjyEMOuxOEo00oJHkeoFd');
+
 registerCustomElement({ token: token });
 var app = Elm.Main.init({ node: document.body });
 registerPorts(app);
@@ -23,78 +25,62 @@ app.ports.firebaseWrite.subscribe(function (data) {
   var collection = firebase.firestore().collection('subscribers');
 
   var phoneRef = collection.doc(data.phoneNumber);
-  if (data.id == "counties") {
-    phoneRef.set({
-      counties: firebase.firestore.FieldValue.arrayUnion({
-        county: data.county,
-        province: data.province,
-      }),
-      latest: data.id,
-    }, { merge: true });
-  } else if (data.id == "states") {
-    phoneRef.set({
-      states: firebase.firestore.FieldValue.arrayUnion({
-        country: data.country,
-        state: data.province,
-      }),
-      latest: data.id,
-    }, { merge: true });
-  } else if (data.id == "countries") {
-    phoneRef.set({
-      countries: firebase.firestore.FieldValue.arrayUnion({
-        country: data.country,
-        state: data.province,
-      }),
-      latest: data.id,
-    }, { merge: true });
-  }
+  phoneRef.get().then(function (doc) {
+    if (doc.data().premium === false) {
+      app.ports.invalidSubscription.send(true);
+    } else {
+      app.ports.invalidSubscription.send(false);
+      if (data.id == "counties") {
+        phoneRef.set({
+          counties: firebase.firestore.FieldValue.arrayUnion({
+            county: data.county,
+            province: data.province,
+          }),
+          latest: data.id,
+        }, { merge: true });
+      } else if (data.id == "states") {
+        phoneRef.set({
+          states: firebase.firestore.FieldValue.arrayUnion({
+            country: data.country,
+            state: data.province,
+          }),
+          latest: data.id,
+        }, { merge: true });
+      } else if (data.id == "countries") {
+        phoneRef.set({
+          countries: firebase.firestore.FieldValue.arrayUnion({
+            country: data.country,
+            state: data.province,
+          }),
+          latest: data.id,
+        }, { merge: true });
+      }
+    }
+  }).catch(function (error) {
+    console.log("Error getting document:", error);
+  });
+});
 
-  // var existsQuery = collection.where("phoneNumber", "==", data.phoneNumber);
+app.ports.processPremium.subscribe(function (data) {
+  stripe.redirectToCheckout({
+    lineItems: [{
+      // Define the product and price in the Dashboard first, and use the price
+      // ID in your client-side code.
+      price: 'price_HMhwHCSHwnhdzw',
+      quantity: 1
+    }],
+    mode: 'payment',
+    successUrl: data.url + 'premium/success/' + data.phoneNumber,
+    cancelUrl: data.url + 'premium/failure/' + data.phoneNumber
+  });
+});
 
-  // existsQuery.get()
-  //   .then(function (querySnapshot) {
-  //     if (querySnapshot.size == 0) {
-  //       console.log("No document exists!");
+app.ports.firebaseUpgrade.subscribe(function (data) {
+  var collection = firebase.firestore().collection('subscribers');
 
-  //       if (data.id == "counties") {
-  //         collection.add({
-  //           phoneNumber: data.phoneNumber,
-  //           counties: [{
-  //             county: data.county,
-  //             province: data.province,
-  //           }],
-  //           states: [],
-  //           countries: [],
-  //         });
-  //       } else if (data.id == "states") {
-  //         collection.add({
-  //           phoneNumber: data.phoneNumber,
-  //           counties: [],
-  //           states: [{
-  //             country: data.country,
-  //             state: data.province,
-  //           }],
-  //           countries: [],
-  //         });
-  //       } else if (data.id == "countries") {
-  //         collection.add({
-  //           phoneNumber: data.phoneNumber,
-  //           counties: [],
-  //           states: [],
-  //           countries: [{
-  //             country: data.country,
-  //             province: data.province,
-  //           }],
-  //         });
-  //       }
-
-  //     } else {
-  //       querySnapshot.forEach(function (doc) {
-  //         console.log(doc.id, " => ", doc.data());
-  //       });
-  //     }
-  //   })
-  //   .catch(function (error) {
-  //     console.log("Error getting documents: ", error);
-  //   });
+  var phoneRef = collection.doc(data);
+  phoneRef.set({
+    premium: true,
+    latest: "premium",
+  }, { merge: true });
 });

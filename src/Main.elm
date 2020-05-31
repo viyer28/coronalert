@@ -1,9 +1,11 @@
 port module Main exposing (main, redExpr)
 
 import Browser
+import Browser.Navigation as Nav
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Events as Events
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html, div, text)
@@ -24,15 +26,18 @@ import Maybe.Extra as Extra
 import PhoneNumber
 import PhoneNumber.Countries
 import Styles.Dark as Dark
+import Url
 
 
 main : Program () Model Msg
 main =
-    Browser.element
+    Browser.application
         { init = init
         , view = view
         , update = update
-        , subscriptions = \m -> Sub.none
+        , subscriptions = subscriptions
+        , onUrlChange = UrlChanged
+        , onUrlRequest = LinkClicked
         }
 
 
@@ -41,17 +46,23 @@ main =
 
 
 type alias Model =
-    { countries : List RecordEntry
-    , states : List RecordEntry
-    , counties : List RecordEntry
+    { countries : List IdRecordEntry
+    , states : List IdRecordEntry
+    , counties : List IdRecordEntry
     , errorMessage : Maybe String
     , hoveredFeature : Maybe E.Value
     , hoveredEntry : Maybe FeatureEntry
     , hoverPoint : Maybe ( Int, Int )
-    , clickedFeature : Maybe E.Value
     , clickedEntry : Maybe FeatureEntry
     , phoneNumber : String
     , validPhone : Maybe Bool
+    , invalidSub : Maybe Bool
+    , search : String
+    , searchResults : List IdRecordEntry
+    , displayPremium : Bool
+    , premiumSuccess : Bool
+    , key : Nav.Key
+    , url : Url.Url
     }
 
 
@@ -62,6 +73,15 @@ type Msg
     | Touch TouchEvent
     | PhoneUpdate String
     | AlertMe
+    | Search String
+    | ClickSearch IdRecordEntry
+    | ClickPremium
+    | Upgrade
+    | LinkClicked Browser.UrlRequest
+    | UrlChanged Url.Url
+    | ExitPremium
+    | InvalidSubscribe Bool
+    | Noop
 
 
 type alias CoordinatesEntry =
@@ -122,12 +142,39 @@ type alias WriteEntry =
     }
 
 
+type alias IdRecordEntry =
+    { id : String
+    , regionType : String
+    , data : RecordEntry
+    }
+
+
+type alias PremiumEntry =
+    { phoneNumber : String
+    , url : String
+    }
+
+
 
 -- INIT
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
+init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init _ url key =
+    let
+        displayPremium =
+            String.contains "premium" url.path
+
+        ( success, phoneNumber ) =
+            if String.startsWith "/premium/success/" url.path then
+                ( True, String.dropLeft 17 url.path )
+
+            else if String.startsWith "/premium/failure/" url.path then
+                ( False, String.dropLeft 17 url.path )
+
+            else
+                ( False, "" )
+    in
     ( { countries = []
       , states = []
       , counties = []
@@ -135,13 +182,38 @@ init _ =
       , hoveredFeature = Nothing
       , hoveredEntry = Nothing
       , hoverPoint = Nothing
-      , clickedFeature = Nothing
       , clickedEntry = Nothing
-      , phoneNumber = ""
+      , phoneNumber = phoneNumber
       , validPhone = Nothing
+      , invalidSub = Nothing
+      , search = ""
+      , searchResults = []
+      , displayPremium = displayPremium
+      , premiumSuccess = success
+      , key = key
+      , url = url
       }
-    , Cmd.batch [ getLatestCountyData, getLatestWorldData ]
+    , Cmd.batch
+        ([ getLatestCountyData
+         , getLatestWorldData
+         ]
+            ++ (if success then
+                    [ firebaseUpgrade phoneNumber ]
+
+                else
+                    []
+               )
+        )
     )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    invalidSubscription InvalidSubscribe
 
 
 
@@ -154,15 +226,24 @@ update msg model =
         DataReceived (Ok records) ->
             if List.any isCountry records then
                 ( { model
-                    | countries = List.filter isCountry records
-                    , states = List.filter isState records
+                    | countries =
+                        List.map
+                            (recordToId "countries")
+                            (List.filter isCountry records)
+                    , states =
+                        List.map
+                            (recordToId "states")
+                            (List.filter isState records)
                   }
                 , Cmd.none
                 )
 
             else
                 ( { model
-                    | counties = records
+                    | counties =
+                        List.map
+                            (recordToId "counties")
+                            records
                   }
                 , Cmd.none
                 )
@@ -209,8 +290,7 @@ update msg model =
             case renderedFeatures of
                 [] ->
                     ( { model
-                        | clickedFeature = Nothing
-                        , clickedEntry = Nothing
+                        | clickedEntry = Nothing
                         , validPhone = Nothing
                       }
                     , Cmd.none
@@ -222,17 +302,15 @@ update msg model =
                             case entry.geometry.coordinates of
                                 lng :: lat :: _ ->
                                     flyIn model
-                                        feat
                                         entry
                                         (LngLat.LngLat lng lat)
 
                                 _ ->
-                                    flyIn model feat entry lngLat
+                                    flyIn model entry lngLat
 
                         Err _ ->
                             ( { model
-                                | clickedFeature = Just feat
-                                , clickedEntry = Nothing
+                                | clickedEntry = Nothing
                                 , validPhone = Nothing
                               }
                             , Cmd.none
@@ -249,8 +327,7 @@ update msg model =
             case renderedFeatures of
                 [] ->
                     ( { model
-                        | clickedFeature = Nothing
-                        , clickedEntry = Nothing
+                        | clickedEntry = Nothing
                         , validPhone = Nothing
                       }
                     , Cmd.none
@@ -262,17 +339,15 @@ update msg model =
                             case entry.geometry.coordinates of
                                 lng :: lat :: _ ->
                                     flyIn model
-                                        feat
                                         entry
                                         (LngLat.LngLat lng lat)
 
                                 _ ->
-                                    flyIn model feat entry lngLat
+                                    flyIn model entry lngLat
 
                         Err _ ->
                             ( { model
-                                | clickedFeature = Just feat
-                                , clickedEntry = Nothing
+                                | clickedEntry = Nothing
                                 , validPhone = Nothing
                               }
                             , Cmd.none
@@ -301,13 +376,98 @@ update msg model =
                 Cmd.none
             )
 
+        Search term ->
+            ( { model
+                | search = term
+                , searchResults =
+                    searchRecords term
+                        (model.counties ++ model.states ++ model.countries)
+              }
+            , Cmd.none
+            )
 
-flyIn : Model -> E.Value -> FeatureEntry -> LngLat -> ( Model, Cmd msg )
-flyIn model feat entry lngLat =
+        ClickSearch record ->
+            let
+                entry =
+                    idToFeature record
+
+                lat =
+                    Maybe.withDefault 0
+                        (String.toFloat record.data.coordinates.latitude)
+
+                lng =
+                    Maybe.withDefault 0
+                        (String.toFloat record.data.coordinates.longitude)
+
+                ( newModel, newCmd ) =
+                    flyIn model entry (LngLat.LngLat lng lat)
+            in
+            ( { newModel | search = "", searchResults = [] }, newCmd )
+
+        ClickPremium ->
+            ( { model | displayPremium = True }, Cmd.none )
+
+        Upgrade ->
+            ( { model | validPhone = Just (validNumber model.phoneNumber) }
+            , if validNumber model.phoneNumber then
+                let
+                    url =
+                        Url.toString model.url
+                in
+                if String.contains "premium" url then
+                    let
+                        index =
+                            String.length url
+                                - Maybe.withDefault 0
+                                    (List.head (String.indexes "premium" url))
+                    in
+                    processPremium
+                        { phoneNumber = model.phoneNumber
+                        , url =
+                            String.dropRight index url
+                        }
+
+                else
+                    processPremium
+                        { phoneNumber = model.phoneNumber
+                        , url = url
+                        }
+
+              else
+                Cmd.none
+            )
+
+        LinkClicked urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl model.key (Url.toString url) )
+
+                Browser.External href ->
+                    ( model, Nav.load href )
+
+        UrlChanged url ->
+            ( { model | url = url }, Cmd.none )
+
+        ExitPremium ->
+            ( { model | displayPremium = False }, Cmd.none )
+
+        InvalidSubscribe isInvalid ->
+            ( { model
+                | invalidSub = Just isInvalid
+                , displayPremium = isInvalid
+              }
+            , Cmd.none
+            )
+
+        Noop ->
+            ( model, Cmd.none )
+
+
+flyIn : Model -> FeatureEntry -> LngLat -> ( Model, Cmd msg )
+flyIn model entry lngLat =
     if entry.layer.id == "countries" then
         ( { model
-            | clickedFeature = Just feat
-            , clickedEntry = Just entry
+            | clickedEntry = Just entry
             , validPhone = Nothing
           }
         , MapCommands.flyTo
@@ -320,8 +480,7 @@ flyIn model feat entry lngLat =
 
     else if entry.layer.id == "states" then
         ( { model
-            | clickedFeature = Just feat
-            , clickedEntry = Just entry
+            | clickedEntry = Just entry
             , validPhone = Nothing
           }
         , MapCommands.flyTo
@@ -334,8 +493,7 @@ flyIn model feat entry lngLat =
 
     else
         ( { model
-            | clickedFeature = Just feat
-            , clickedEntry = Just entry
+            | clickedEntry = Just entry
             , validPhone = Nothing
           }
         , MapCommands.flyTo
@@ -357,29 +515,778 @@ validNumber number =
         number
 
 
+recordToId : String -> RecordEntry -> IdRecordEntry
+recordToId region record =
+    case region of
+        "counties" ->
+            case record.province of
+                Nothing ->
+                    Debug.todo "recordToId: invalid county"
+
+                Just state ->
+                    case record.county of
+                        Nothing ->
+                            Debug.todo "recordToId: invalid county"
+
+                        Just county ->
+                            { id = county ++ " County, " ++ state
+                            , regionType = region
+                            , data = record
+                            }
+
+        "states" ->
+            case record.province of
+                Nothing ->
+                    Debug.todo "recordToId: invalid state"
+
+                Just state ->
+                    { id = state ++ ", " ++ record.country
+                    , regionType = region
+                    , data = record
+                    }
+
+        "countries" ->
+            case record.province of
+                Nothing ->
+                    { id = record.country
+                    , regionType = region
+                    , data = record
+                    }
+
+                Just province ->
+                    { id = province ++ ", " ++ record.country
+                    , regionType = region
+                    , data = record
+                    }
+
+        _ ->
+            Debug.todo "recordToId: invalid region"
+
+
+idsToRecords : List IdRecordEntry -> List RecordEntry
+idsToRecords records =
+    List.map (\r -> r.data) records
+
+
+searchRecords : String -> List IdRecordEntry -> List IdRecordEntry
+searchRecords query records =
+    let
+        lowerQuery =
+            String.toLower query
+    in
+    if query == "" then
+        []
+
+    else
+        List.sortBy (\x -> String.length x.id)
+            (List.filter
+                (\x -> String.contains lowerQuery (String.toLower x.id))
+                records
+            )
+
+
+idToFeature : IdRecordEntry -> FeatureEntry
+idToFeature id =
+    FeatureEntry
+        (GeometryEntry
+            [ Maybe.withDefault
+                0
+                (String.toFloat id.data.coordinates.longitude)
+            , Maybe.withDefault
+                0
+                (String.toFloat id.data.coordinates.latitude)
+            ]
+        )
+        { country = id.data.country
+        , province = Maybe.withDefault "null" id.data.province
+        , county = id.data.county
+        , updatedAt = id.data.updatedAt
+        , confirmed = id.data.stats.confirmed
+        , deaths = id.data.stats.deaths
+        , recovered = id.data.stats.recovered
+        }
+        (LayerEntry
+            id.regionType
+        )
+
+
 
 -- VIEW
 
 
-view : Model -> Html Msg
+view : Model -> Browser.Document Msg
 view model =
-    Element.layout []
-        (column
-            [ height fill
-            , width fill
+    { title = "Coronalert | The COVID Map with Text Alerts"
+    , body =
+        [ Element.layout []
+            (column
+                [ height fill
+                , width fill
+                , centerX
+                , Background.color (Element.rgb 0 0 0)
+                ]
+                [ Element.el
+                    [ Element.inFront
+                        (hoverView model.hoverPoint model.hoveredEntry)
+                    , Element.inFront
+                        (clickView model.phoneNumber model.validPhone model.invalidSub model.clickedEntry)
+                    , Element.inFront
+                        actions
+                    , Element.inFront (header model.search model.searchResults)
+                    , Element.inFront
+                        (premium
+                            model.displayPremium
+                            model.phoneNumber
+                            model.validPhone
+                            model.premiumSuccess
+                        )
+                    , height fill
+                    , width fill
+                    ]
+                    (Element.html (map model))
+                ]
+            )
+        ]
+    }
+
+
+header : String -> List IdRecordEntry -> Element Msg
+header searchTerm searchResults =
+    let
+        searchDisplay =
+            List.take 5 searchResults
+    in
+    Element.column
+        [ width shrink
+        , height shrink
+        , alignLeft
+        , moveRight 25
+        , alignTop
+        , moveDown 25
+        , spacing 13
+        ]
+        [ Element.column
+            [ width (px 385)
+            , height shrink
             , centerX
+            , spacing 10
+            , Background.color (Element.rgb 0 0 0)
+            , Border.shadow
+                { offset = ( 0, 1 )
+                , size = 4
+                , blur = 15
+                , color = Element.rgb 0.1 0.1 0.1
+                }
+            , Border.rounded 25
+            , padding 25
             ]
             [ Element.el
-                [ Element.inFront
-                    (hoverView model.hoverPoint model.hoveredEntry)
-                , Element.inFront
-                    (clickView model.phoneNumber model.validPhone model.clickedEntry)
-                , height fill
-                , width fill
+                [ width shrink
+                , height shrink
+                , centerX
+                , Font.color (Element.rgb 1 1 1)
+                , Font.size 36
+                , Font.bold
                 ]
-                (Element.html (map model))
+                (Element.text "Coronalert 🚨")
+            , Element.el
+                [ width shrink
+                , height shrink
+                , centerX
+                , Font.color (Element.rgb 1 1 1)
+                , Font.size 18
+                , Font.light
+                ]
+                (Element.text "The COVID Map with Text Alerts")
             ]
-        )
+        , Element.el
+            [ width fill
+            , height fill
+            , Element.behindContent
+                (Element.el
+                    [ width fill
+                    , height
+                        (px
+                            (List.length searchDisplay
+                                * 40
+                                + 20
+                            )
+                        )
+                    , moveDown 20
+                    , Border.roundEach
+                        { topLeft = 0
+                        , topRight = 0
+                        , bottomLeft = 20
+                        , bottomRight = 20
+                        }
+                    , Border.shadow
+                        { offset = ( 0, 1 )
+                        , size = 4
+                        , blur = 15
+                        , color = Element.rgb 0.1 0.1 0.1
+                        }
+                    , Background.color (Element.rgb255 0 0 0)
+                    , clip
+                    ]
+                    (Element.column
+                        [ width fill
+                        , height (px (List.length searchDisplay * 40))
+                        , moveDown 20
+                        ]
+                        (List.map searchEntry searchDisplay)
+                    )
+                )
+            ]
+            (Element.row
+                [ width fill
+                , height (px 40)
+                , Border.rounded 20
+                , Background.color (Element.rgb 0 0 0)
+                , Border.color (Element.rgb255 58 58 60)
+                , Border.width 1
+                , spacing 15
+                , clip
+                , mouseOver
+                    [ Background.color
+                        (Element.rgb255 15 15 15)
+                    ]
+                ]
+                [ Element.image
+                    [ centerY
+                    , alignLeft
+                    , moveRight 15
+                    , height (px 15)
+                    ]
+                    { src = "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTS3q-vOrSdYJMUqjBY-f4SLffkAQVVXo0jCKUuSaIzIiJi4gro&usqp=CAU"
+                    , description = "search icon"
+                    }
+                , Input.text
+                    [ centerY
+                    , Font.alignLeft
+                    , height (px 30)
+                    , Background.color (Element.rgba 0 0 0 0)
+                    , width fill
+                    , Border.color (Element.rgba 0 0 0 0)
+                    , Font.size 16
+                    , Font.color (Element.rgb 1 1 1)
+                    , Element.focused [ Border.color (Element.rgba 0 0 0 0) ]
+                    , moveUp 6
+                    , Input.focusedOnLoad
+                    , onEnter
+                        (case List.head searchDisplay of
+                            Nothing ->
+                                Noop
+
+                            Just entry ->
+                                ClickSearch entry
+                        )
+                    ]
+                    { label = Input.labelHidden ""
+                    , onChange =
+                        \new -> Search new
+                    , placeholder =
+                        Just (Input.placeholder [ moveUp 6, Font.size 16 ] (Element.text "search a county, state, or country"))
+                    , text = searchTerm
+                    }
+                ]
+            )
+        ]
+
+
+searchEntry : IdRecordEntry -> Element Msg
+searchEntry entry =
+    Input.button
+        [ Background.color (Element.rgba 0 0 0 0)
+        , width fill
+        , height (px 40)
+        , Font.center
+        , Element.focused
+            [ Border.color (Element.rgba 0 0 0 0) ]
+        , mouseOver [ Background.color (Element.rgb255 15 15 15) ]
+        ]
+        { onPress = Just (ClickSearch entry)
+        , label =
+            Element.row
+                [ width fill
+                , height fill
+                , spacing 30
+                ]
+                [ Element.image
+                    [ centerY
+                    , alignLeft
+                    , moveRight 17
+                    , height (px 15)
+                    , moveUp 1
+                    ]
+                    { src = "https://raw.githubusercontent.com/viyer28/coronalert/master/pin_icon.png"
+                    , description = "pin icon"
+                    }
+                , Element.el
+                    [ Font.size 14
+                    , Font.color
+                        (Element.rgb 1 1 1)
+                    , centerY
+                    , width shrink
+                    , height shrink
+                    , Font.extraLight
+                    , centerY
+                    , Font.alignLeft
+                    ]
+                    (Element.text entry.id)
+                ]
+        }
+
+
+actions : Element Msg
+actions =
+    Element.column
+        [ width shrink
+        , height shrink
+        , alignRight
+        , moveLeft 25
+        , alignTop
+        , moveDown 25
+        , spacing 10
+        ]
+        [ Element.newTabLink
+            [ width (px 50)
+            , height (px 50)
+            , Background.color blue
+            , Border.rounded 25
+            , clip
+            , Border.shadow
+                { offset = ( 0, 1 )
+                , size = 2
+                , blur = 15
+                , color = Element.rgb 0.1 0.1 0.1
+                }
+            , mouseOver
+                [ Background.color
+                    (Element.rgb255 51 153 255)
+                ]
+            , Element.focused [ Border.color (Element.rgba 0 0 0 0) ]
+            ]
+            { url = "https://twitter.com/intent/tweet?url=https%3A%2F%2Fwww.coronalert.live&text=Check%20out%20Coronalert%20-%20the%20COVID%20map%20with%20text%20alerts.%20Stay%20safe%2C%20stay%20alert%21&hashtags=COVID%2Ccoronavirus"
+            , label =
+                Element.image
+                    [ centerY
+                    , centerX
+                    , height (px 20)
+                    ]
+                    { src = "https://raw.githubusercontent.com/viyer28/coronalert/master/share_icon.png"
+                    , description = "share button"
+                    }
+            }
+        , Input.button
+            [ width (px 50)
+            , height (px 50)
+            , Background.color (Element.rgb255 94 92 230)
+            , Border.rounded 25
+            , clip
+            , Border.shadow
+                { offset = ( 0, 1 )
+                , size = 2
+                , blur = 15
+                , color = Element.rgb 0.1 0.1 0.1
+                }
+            , mouseOver
+                [ Background.color
+                    (Element.rgb255 111 109 232)
+                ]
+            , Element.focused
+                [ Border.color (Element.rgba 0 0 0 0) ]
+            ]
+            { onPress = Just ClickPremium
+            , label =
+                Element.image
+                    [ centerY
+                    , centerX
+                    , height (px 20)
+                    ]
+                    { src = " https://raw.githubusercontent.com/viyer28/coronalert/master/premium_icon.png"
+                    , description = "premium button"
+                    }
+            }
+        ]
+
+
+premium : Bool -> String -> Maybe Bool -> Bool -> Element Msg
+premium displayPremium phoneNum validPhone success =
+    if displayPremium then
+        Element.el
+            [ width fill
+            , height fill
+            , Element.inFront
+                (Element.el
+                    [ width fill
+                    , height fill
+                    , Background.color (Element.rgba 0 0 0 0.5)
+                    , Events.onClick ExitPremium
+                    ]
+                    Element.none
+                )
+            , Element.inFront
+                (Element.el
+                    [ centerX
+                    , centerY
+                    , width shrink
+                    , height shrink
+                    , Background.color (Element.rgb255 0 0 0)
+                    , Border.rounded 40
+                    , Border.shadow
+                        { offset = ( 0, 1 )
+                        , size = 4
+                        , blur = 20
+                        , color = Element.rgb 0.1 0.1 0.1
+                        }
+                    , paddingEach
+                        { top = 14
+                        , left = 0
+                        , right = 0
+                        , bottom = 40
+                        }
+                    ]
+                    (Element.column
+                        [ spacing 5 ]
+                        [ Input.button
+                            [ alignLeft
+                            , moveRight 20
+                            , moveDown 2
+                            , Background.color (Element.rgb255 255 69 58)
+                            , width (px 16)
+                            , height (px 16)
+                            , Border.rounded 8
+                            , Element.focused []
+                            , mouseOver
+                                [ Background.color (Element.rgb255 255 90 82) ]
+                            ]
+                            { onPress = Just ExitPremium
+                            , label =
+                                Element.image
+                                    [ centerX
+                                    , centerY
+                                    , height (px 7)
+                                    , width (px 7)
+                                    ]
+                                    { src = " https://raw.githubusercontent.com/viyer28/coronalert/master/close_icon.png"
+                                    , description = "back button"
+                                    }
+                            }
+                        , Element.column
+                            [ spacing 10
+                            , centerX
+                            , paddingEach
+                                { top = 0
+                                , left = 40
+                                , right = 40
+                                , bottom = 0
+                                }
+                            ]
+                            ([ Element.el
+                                [ Font.color (Element.rgb 1 1 1)
+                                , Font.size 28
+                                , Font.bold
+                                , Font.center
+                                , centerX
+                                , width shrink
+                                , height shrink
+                                ]
+                                (Element.text "Love Coronalert? ❤️")
+                             , Element.el
+                                [ Font.color (Element.rgb 1 1 1)
+                                , Font.size 24
+                                , Font.light
+                                , Font.center
+                                , centerX
+                                , width shrink
+                                , height shrink
+                                ]
+                                (Element.text "Upgrade to Coronalert Premium")
+                             , Element.el
+                                [ Font.color (Element.rgb 1 1 1)
+                                , Font.size 72
+                                , Font.light
+                                , Font.center
+                                , centerX
+                                , width shrink
+                                , height shrink
+                                , padding 10
+                                ]
+                                (Element.text "$5")
+                             , Element.column
+                                [ centerX
+                                , padding 15
+                                , spacing 10
+                                , width shrink
+                                , height shrink
+                                ]
+                                [ Element.el
+                                    [ Font.color (Element.rgb 1 1 1)
+                                    , Font.size 18
+                                    , Font.regular
+                                    , Font.center
+                                    , alignLeft
+                                    , width shrink
+                                    , height shrink
+                                    ]
+                                    (Element.text "✅ Unlimited Subscriptions")
+                                , Element.el
+                                    [ Font.color (Element.rgb 1 1 1)
+                                    , Font.size 18
+                                    , Font.regular
+                                    , Font.center
+                                    , alignLeft
+                                    , width shrink
+                                    , height shrink
+                                    ]
+                                    (Element.text "✅ Unlimited Alerts")
+                                , Element.el
+                                    [ Font.color (Element.rgb 1 1 1)
+                                    , Font.size 18
+                                    , Font.regular
+                                    , Font.center
+                                    , alignLeft
+                                    , width shrink
+                                    , height shrink
+                                    ]
+                                    (Element.text "✅ 20% Donated to:")
+                                , Element.newTabLink
+                                    [ Font.color (Element.rgba 1 1 1 0.75)
+                                    , Font.size 14
+                                    , Font.regular
+                                    , Font.center
+                                    , Font.underline
+                                    , alignLeft
+                                    , width shrink
+                                    , height shrink
+                                    , mouseOver [ Font.color (Element.rgba 1 1 1 1) ]
+                                    ]
+                                    { url = "https://www.feedingamerica.org/about-us/press-room/feeding-america-establishes-covid-19-response-fund-help-food-banks-during"
+                                    , label = Element.text "Feeding America COVID-19 Response Fund"
+                                    }
+                                ]
+                             ]
+                                ++ premiumFooter success phoneNum validPhone
+                            )
+                        ]
+                    )
+                )
+            ]
+            Element.none
+
+    else
+        Element.none
+
+
+premiumFooter : Bool -> String -> Maybe Bool -> List (Element Msg)
+premiumFooter success phoneNum validPhone =
+    if success then
+        let
+            shareUrl =
+                "https://twitter.com/intent/tweet?url=http%3A%2F%2Fwww.coronalert.live&text=Check%20out%20Coronalert%20-%20the%20best%20COVID%20map%20on%20the%20web.%20Stay%20safe%2C%20stay%20alert%21&hashtags=COVID%2Ccoronavirus"
+        in
+        [ Element.column
+            [ spacing 5 ]
+            [ Element.el
+                [ paddingEach { top = 5, bottom = 0, left = 5, right = 5 }
+                , centerX
+                , centerY
+                ]
+                (Element.el
+                    [ Font.center
+                    , Font.color (Element.rgb 1 1 1)
+                    , Font.size 14
+                    , centerX
+                    , centerY
+                    ]
+                    (Element.el
+                        [ Font.size 14
+                        , Font.color (Element.rgb 1 1 1)
+                        , centerX
+                        , paddingEach { top = 0, bottom = 5, left = 5, right = 5 }
+                        , Font.center
+                        , Font.bold
+                        ]
+                        (Element.text "Thank you for upgrading to Premium 🙏")
+                    )
+                )
+            , Element.el
+                [ padding 5
+                , centerX
+                , centerY
+                , Background.color (Element.rgb255 28 28 30)
+                , width (px 325)
+                , height (px 50)
+                , Border.rounded 15
+                ]
+                (Element.el
+                    [ Font.center
+                    , Font.bold
+                    , Font.color green
+                    , centerX
+                    , centerY
+                    ]
+                    (Element.text "Upgraded ✓")
+                )
+            , Element.el
+                [ Font.size 14
+                , centerX
+                ]
+                Element.none
+            , Element.el
+                [ padding 5
+                , centerX
+                ]
+                (Element.newTabLink
+                    [ Background.color blue
+                    , width (px 325)
+                    , height (px 50)
+                    , Border.rounded 15
+                    , padding 10
+                    , Font.center
+                    , Border.shadow
+                        { offset = ( 0, 1 )
+                        , size = 4
+                        , blur = 20
+                        , color = Element.rgb 0.1 0.1 0.1
+                        }
+                    , mouseOver
+                        [ Background.color
+                            (Element.rgb255 51 153 255)
+                        ]
+                    ]
+                    { url = shareUrl
+                    , label =
+                        Element.el
+                            [ Font.size 16
+                            , Font.color
+                                (Element.rgb 1 1 1)
+                            , centerX
+                            , centerY
+                            , width shrink
+                            , height shrink
+                            , Font.extraLight
+                            ]
+                            (Element.text "Share to Twitter")
+                    }
+                )
+            ]
+        ]
+
+    else
+        [ Element.column
+            [ centerX ]
+            [ Element.el
+                [ padding 5
+                , centerX
+                ]
+                (let
+                    formatted =
+                        if phoneNum == "" then
+                            ""
+
+                        else if String.length phoneNum < 3 then
+                            "(" ++ phoneNum
+
+                        else if String.length phoneNum < 6 then
+                            "(" ++ String.slice 0 3 phoneNum ++ ") " ++ String.slice 3 6 phoneNum
+
+                        else if String.length phoneNum <= 10 then
+                            "(" ++ String.slice 0 3 phoneNum ++ ") " ++ String.slice 3 6 phoneNum ++ " - " ++ String.slice 6 10 phoneNum
+
+                        else
+                            phoneNum
+                 in
+                 Input.text
+                    [ centerX
+                    , Background.color (Element.rgb 1 1 1)
+                    , width (px 325)
+                    , height (px 50)
+                    , Font.alignLeft
+                    , Border.rounded 15
+                    , onEnter Upgrade
+                    , mouseOver
+                        [ Background.color
+                            (Element.rgb255 242 242 247)
+                        ]
+                    ]
+                    { label =
+                        Input.labelAbove
+                            [ Font.size 14
+                            , Font.color (Element.rgb 1 1 1)
+                            , centerX
+                            , paddingEach { top = 0, bottom = 5, left = 5, right = 5 }
+                            , Font.center
+                            , Font.bold
+                            ]
+                            (Element.text "Enter your phone number to upgrade")
+                    , onChange =
+                        \new ->
+                            if
+                                (String.right 1 new == ")")
+                                    || (String.right 1 new == "-")
+                                    || (String.length (String.filter Char.isDigit new) > 10)
+                            then
+                                PhoneUpdate (String.dropRight 1 (String.filter Char.isDigit new))
+
+                            else
+                                PhoneUpdate (String.filter Char.isDigit new)
+                    , placeholder =
+                        Just (Input.placeholder [] (Element.text "(___) ___ - ____"))
+                    , text = formatted
+                    }
+                )
+            , Element.el
+                [ Font.size 14
+                , Font.color red
+                , centerX
+                ]
+                (case validPhone of
+                    Just False ->
+                        Element.text "Oops, that's not a phone number. Try again!"
+
+                    _ ->
+                        Element.none
+                )
+            , Element.el
+                [ padding 5
+                , centerX
+                ]
+                (Input.button
+                    [ Background.color (Element.rgb255 94 92 230)
+                    , width (px 325)
+                    , height (px 50)
+                    , Border.rounded 15
+                    , padding 10
+                    , Font.center
+                    , Border.shadow
+                        { offset = ( 0, 1 )
+                        , size = 4
+                        , blur = 20
+                        , color = Element.rgb 0.1 0.1 0.1
+                        }
+                    , mouseOver
+                        [ Background.color
+                            (Element.rgb255 111 109 232)
+                        ]
+                    ]
+                    { onPress = Just Upgrade
+                    , label =
+                        Element.el
+                            [ Font.size 16
+                            , Font.color
+                                (Element.rgb 1 1 1)
+                            , centerX
+                            , centerY
+                            , width shrink
+                            , height shrink
+                            , Font.extraLight
+                            ]
+                            (Element.text "Get Premium")
+                    }
+                )
+            ]
+        ]
 
 
 map : Model -> Html Msg
@@ -397,20 +1304,20 @@ map model =
             (Dark.styleWithAttr
                 [ Source.geoJSONFromValue "counties"
                     []
-                    (encodeRecords model.counties)
+                    (encodeRecords (idsToRecords model.counties))
                 , Source.geoJSONFromValue "states"
                     []
-                    (encodeRecords model.states)
+                    (encodeRecords (idsToRecords model.states))
                 , Source.geoJSONFromValue "countries"
                     []
-                    (encodeRecords model.countries)
+                    (encodeRecords (idsToRecords model.countries))
                 ]
                 [ Layer.circle "counties"
                     "counties"
                     [ Layer.circleRadius
                         (countySize
-                            (minConfirmed model.counties)
-                            (maxConfirmed model.counties)
+                            (minConfirmed (idsToRecords model.counties))
+                            (maxConfirmed (idsToRecords model.counties))
                         )
                     , Layer.circleColor featureColor
                     , Layer.circleOpacity countyOpacity
@@ -420,8 +1327,8 @@ map model =
                     "states"
                     [ Layer.circleRadius
                         (stateSize
-                            (minConfirmed model.counties)
-                            (maxConfirmed model.countries)
+                            (minConfirmed (idsToRecords model.counties))
+                            (maxConfirmed (idsToRecords model.countries))
                         )
                     , Layer.circleColor featureColor
                     , Layer.circleOpacity stateOpacity
@@ -431,8 +1338,8 @@ map model =
                     "countries"
                     [ Layer.circleRadius
                         (countrySize
-                            (minConfirmed model.countries)
-                            (maxConfirmed model.countries)
+                            (minConfirmed (idsToRecords model.countries))
+                            (maxConfirmed (idsToRecords model.countries))
                         )
                     , Layer.circleColor featureColor
                     , Layer.circleOpacity countryOpacity
@@ -548,8 +1455,8 @@ titleLabel layer properties =
             ( "", "" )
 
 
-clickView : String -> Maybe Bool -> Maybe FeatureEntry -> Element Msg
-clickView phoneNum validPhone entry =
+clickView : String -> Maybe Bool -> Maybe Bool -> Maybe FeatureEntry -> Element Msg
+clickView phoneNum validPhone invalidSub entry =
     case entry of
         Nothing ->
             Element.none
@@ -560,9 +1467,10 @@ clickView phoneNum validPhone entry =
                     titleLabel layer properties
             in
             Element.el
-                [ centerX
+                [ alignLeft
                 , alignBottom
-                , moveUp 50
+                , moveUp 25
+                , moveRight 25
                 , width shrink
                 , height shrink
                 , Background.color (Element.rgb 0 0 0)
@@ -581,7 +1489,7 @@ clickView phoneNum validPhone entry =
                     ]
                     ([ Element.el
                         [ Font.color (Element.rgb 1 1 1)
-                        , Font.size 36
+                        , Font.size 28
                         , Font.bold
                         , Font.center
                         , centerX
@@ -647,15 +1555,15 @@ clickView phoneNum validPhone entry =
                             )
                         ]
                      ]
-                        ++ textView phoneNum validPhone properties title
+                        ++ textView phoneNum validPhone invalidSub properties title
                     )
                 )
 
 
-textView : String -> Maybe Bool -> PropertiesEntry -> String -> List (Element Msg)
-textView phoneNum validPhone properties title =
-    case validPhone of
-        Just True ->
+textView : String -> Maybe Bool -> Maybe Bool -> PropertiesEntry -> String -> List (Element Msg)
+textView phoneNum validPhone invalidSub properties title =
+    case ( validPhone, invalidSub ) of
+        ( Just True, Just False ) ->
             let
                 shareUrl =
                     "https://twitter.com/intent/tweet?url=http%3A%2F%2Fwww.coronalert.live&text="
@@ -664,10 +1572,10 @@ textView phoneNum validPhone properties title =
                         ++ String.fromInt properties.deaths
                         ++ "%20deaths%20in%20"
                         ++ String.replace " " "%20" title
-                        ++ ".%20Stay%20safe%2C%20stay%20alert%21&hashtags=COVID%2C%20coronavirus"
+                        ++ ".%20Stay%20safe%2C%20stay%20alert%21&hashtags=COVID%2Ccoronavirus"
             in
             [ Element.el
-                [ paddingEach { top = 15, bottom = 5, left = 5, right = 5 }
+                [ paddingEach { top = 10, bottom = 10, left = 5, right = 5 }
                 , centerX
                 , centerY
                 ]
@@ -678,7 +1586,19 @@ textView phoneNum validPhone properties title =
                     , centerX
                     , centerY
                     ]
-                    (Element.text "Check your phone for a confirmation text")
+                    (Element.column
+                        [ spacing 5
+                        , Font.bold
+                        ]
+                        [ Element.text "Check your phone for a confirmation text"
+                        , Element.el
+                            [ Font.center
+                            , centerX
+                            , Font.light
+                            ]
+                            (Element.text "It will arrive within 30 seconds")
+                        ]
+                    )
                 )
             , Element.el
                 [ padding 5
@@ -720,11 +1640,15 @@ textView phoneNum validPhone properties title =
                         , blur = 20
                         , color = Element.rgb 0.1 0.1 0.1
                         }
+                    , mouseOver
+                        [ Background.color
+                            (Element.rgb255 51 153 255)
+                        ]
                     ]
                     { url = shareUrl
                     , label =
                         Element.el
-                            [ Font.size 18
+                            [ Font.size 16
                             , Font.color
                                 (Element.rgb 1 1 1)
                             , centerX
@@ -768,16 +1692,34 @@ textView phoneNum validPhone properties title =
                     , Font.alignLeft
                     , Border.rounded 15
                     , onEnter AlertMe
+                    , mouseOver
+                        [ Background.color
+                            (Element.rgb255 242 242 247)
+                        ]
                     ]
                     { label =
                         Input.labelAbove
                             [ Font.size 14
                             , Font.color (Element.rgb 1 1 1)
                             , centerX
-                            , padding 5
+                            , paddingEach { top = 0, bottom = 5, left = 5, right = 5 }
                             , Font.center
                             ]
-                            (Element.text "Enter your phone number for text updates")
+                            (Element.column
+                                [ paddingEach { top = 0, bottom = 5, left = 5, right = 5 }
+                                , spacing 5
+                                ]
+                                [ Element.el
+                                    [ Font.bold ]
+                                    (Element.text "Enter your phone number for text updates")
+                                , Element.el
+                                    [ Font.center
+                                    , centerX
+                                    , Font.light
+                                    ]
+                                    (Element.text "Text 'STOP' anytime to unsubscribe")
+                                ]
+                            )
                     , onChange =
                         \new ->
                             if
@@ -823,11 +1765,15 @@ textView phoneNum validPhone properties title =
                         , blur = 20
                         , color = Element.rgb 0.1 0.1 0.1
                         }
+                    , mouseOver
+                        [ Background.color
+                            (Element.rgb255 51 153 255)
+                        ]
                     ]
                     { onPress = Just AlertMe
                     , label =
                         Element.el
-                            [ Font.size 18
+                            [ Font.size 16
                             , Font.color
                                 (Element.rgb 1 1 1)
                             , centerX
@@ -836,7 +1782,7 @@ textView phoneNum validPhone properties title =
                             , height shrink
                             , Font.extraLight
                             ]
-                            (Element.text ("Alert me on " ++ title))
+                            (Element.text ("Subscribe to " ++ title))
                     }
                 )
             ]
@@ -1248,3 +2194,12 @@ greenExpr =
 
 
 port firebaseWrite : WriteEntry -> Cmd msg
+
+
+port processPremium : PremiumEntry -> Cmd msg
+
+
+port firebaseUpgrade : String -> Cmd msg
+
+
+port invalidSubscription : (Bool -> msg) -> Sub msg
