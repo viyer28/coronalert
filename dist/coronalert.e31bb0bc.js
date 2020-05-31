@@ -20210,7 +20210,6 @@ var $author$project$Main$clickView = F5(
 						[
 							$mdgriffith$elm_ui$Element$centerX,
 							$mdgriffith$elm_ui$Element$alignBottom,
-							$mdgriffith$elm_ui$Element$moveUp(10),
 							$mdgriffith$elm_ui$Element$scale(0.8)
 						]) : _List_fromArray(
 						[
@@ -57705,8 +57704,8 @@ var stripe = Stripe('pk_live_p5afHJ20fpbPORRrAdHXRfyq00c6LKjfF3');
 var app = _Main.Elm.Main.init({
   node: document.body,
   flags: {
-    height: document.documentElement.clientHeight,
-    width: document.documentElement.clientWidth
+    height: window.innerHeight,
+    width: window.innerWidth
   }
 });
 
