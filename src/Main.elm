@@ -683,7 +683,7 @@ view model =
                     , Element.inFront
                         (clickView model.phoneNumber model.validPhone model.invalidSub model.clickedEntry)
                     , Element.inFront
-                        actions
+                        (actions isMobile)
                     , Element.inFront
                         (header isMobile model.search model.searchResults)
                     , Element.inFront
@@ -919,77 +919,94 @@ searchEntry entry =
         }
 
 
-actions : Element Msg
-actions =
-    Element.column
-        [ width shrink
-        , height shrink
-        , alignRight
-        , moveLeft 25
-        , alignTop
-        , moveDown 25
-        , spacing 10
-        ]
-        [ Element.newTabLink
-            [ width (px 50)
-            , height (px 50)
-            , Background.color blue
-            , Border.rounded 25
-            , clip
-            , Border.shadow
-                { offset = ( 0, 1 )
-                , size = 2
-                , blur = 15
-                , color = Element.rgb 0.1 0.1 0.1
-                }
-            , mouseOver
-                [ Background.color
-                    (Element.rgb255 51 153 255)
-                ]
-            , Element.focused [ Border.color (Element.rgba 0 0 0 0) ]
-            ]
-            { url = "https://twitter.com/intent/tweet?url=https%3A%2F%2Fwww.coronalert.live&text=Check%20out%20Coronalert%20-%20the%20COVID%20map%20with%20text%20alerts.%20Stay%20safe%2C%20stay%20alert%21&hashtags=COVID%2Ccoronavirus"
-            , label =
-                Element.image
-                    [ centerY
-                    , centerX
-                    , height (px 20)
-                    ]
-                    { src = "https://raw.githubusercontent.com/viyer28/coronalert/master/share_icon.png"
-                    , description = "share button"
+actions : Bool -> Element Msg
+actions mobile =
+    let
+        buttons =
+            [ Element.newTabLink
+                [ width (px 50)
+                , height (px 50)
+                , Background.color blue
+                , Border.rounded 25
+                , clip
+                , Border.shadow
+                    { offset = ( 0, 1 )
+                    , size = 2
+                    , blur = 15
+                    , color = Element.rgb 0.1 0.1 0.1
                     }
-            }
-        , Input.button
-            [ width (px 50)
-            , height (px 50)
-            , Background.color (Element.rgb255 94 92 230)
-            , Border.rounded 25
-            , clip
-            , Border.shadow
-                { offset = ( 0, 1 )
-                , size = 2
-                , blur = 15
-                , color = Element.rgb 0.1 0.1 0.1
-                }
-            , mouseOver
-                [ Background.color
-                    (Element.rgb255 111 109 232)
-                ]
-            , Element.focused
-                [ Border.color (Element.rgba 0 0 0 0) ]
-            ]
-            { onPress = Just ClickPremium
-            , label =
-                Element.image
-                    [ centerY
-                    , centerX
-                    , height (px 20)
+                , mouseOver
+                    [ Background.color
+                        (Element.rgb255 51 153 255)
                     ]
-                    { src = " https://raw.githubusercontent.com/viyer28/coronalert/master/premium_icon.png"
-                    , description = "premium button"
+                , Element.focused [ Border.color (Element.rgba 0 0 0 0) ]
+                ]
+                { url = "https://twitter.com/intent/tweet?url=https%3A%2F%2Fwww.coronalert.live&text=Check%20out%20Coronalert%20-%20the%20COVID%20map%20with%20text%20alerts.%20Stay%20safe%2C%20stay%20alert%21&hashtags=COVID%2Ccoronavirus"
+                , label =
+                    Element.image
+                        [ centerY
+                        , centerX
+                        , height (px 20)
+                        ]
+                        { src = "https://raw.githubusercontent.com/viyer28/coronalert/master/share_icon.png"
+                        , description = "share button"
+                        }
+                }
+            , Input.button
+                [ width (px 50)
+                , height (px 50)
+                , Background.color (Element.rgb255 94 92 230)
+                , Border.rounded 25
+                , clip
+                , Border.shadow
+                    { offset = ( 0, 1 )
+                    , size = 2
+                    , blur = 15
+                    , color = Element.rgb 0.1 0.1 0.1
                     }
-            }
-        ]
+                , mouseOver
+                    [ Background.color
+                        (Element.rgb255 111 109 232)
+                    ]
+                , Element.focused
+                    [ Border.color (Element.rgba 0 0 0 0) ]
+                ]
+                { onPress = Just ClickPremium
+                , label =
+                    Element.image
+                        [ centerY
+                        , centerX
+                        , height (px 20)
+                        ]
+                        { src = " https://raw.githubusercontent.com/viyer28/coronalert/master/premium_icon.png"
+                        , description = "premium button"
+                        }
+                }
+            ]
+    in
+    if mobile then
+        Element.row
+            [ width shrink
+            , height shrink
+            , centerX
+            , spacing 375
+            , alignTop
+            , moveDown 117
+            , scale 0.7
+            ]
+            buttons
+
+    else
+        Element.column
+            [ width shrink
+            , height shrink
+            , alignRight
+            , moveLeft 25
+            , alignTop
+            , moveDown 25
+            , spacing 10
+            ]
+            buttons
 
 
 premium : Bool -> String -> Maybe Bool -> Bool -> Element Msg
