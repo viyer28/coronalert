@@ -32442,7 +32442,14 @@ var $author$project$Main$map = function (model) {
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				A2($elm$html$Html$Attributes$style, 'height', '100vh')
+				A2(
+				$elm$html$Html$Attributes$style,
+				'height',
+				$elm$core$String$fromInt(model.height) + 'px'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'width',
+				$elm$core$String$fromInt(model.width) + 'px')
 			]),
 		_List_fromArray(
 			[
@@ -57813,7 +57820,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54282" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55160" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

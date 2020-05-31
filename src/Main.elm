@@ -1564,7 +1564,9 @@ map model =
                 [ Style.defaultZoomLevel 3.25 ]
     in
     div
-        [ Html.Attributes.style "height" "100vh" ]
+        [ Html.Attributes.style "height" (String.fromInt model.height ++ "px")
+        , Html.Attributes.style "width" (String.fromInt model.width ++ "px")
+        ]
         [ Mapbox.Element.map
             ([ id "my-map"
              , onClick Click
