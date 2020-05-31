@@ -32829,8 +32829,8 @@ var $author$project$Main$premiumFooter = F3(
 		}
 	});
 var $mdgriffith$elm_ui$Element$Font$underline = $mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.underline);
-var $author$project$Main$premium = F4(
-	function (displayPremium, phoneNum, validPhone, success) {
+var $author$project$Main$premium = F5(
+	function (mobile, displayPremium, phoneNum, validPhone, success) {
 		return displayPremium ? A2(
 			$mdgriffith$elm_ui$Element$el,
 			_List_fromArray(
@@ -32852,25 +32852,30 @@ var $author$project$Main$premium = F4(
 					$mdgriffith$elm_ui$Element$inFront(
 					A2(
 						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$centerX,
-								$mdgriffith$elm_ui$Element$centerY,
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-								$mdgriffith$elm_ui$Element$Background$color(
-								A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0)),
-								$mdgriffith$elm_ui$Element$Border$rounded(40),
-								$mdgriffith$elm_ui$Element$Border$shadow(
-								{
-									blur: 20,
-									color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
-									offset: _Utils_Tuple2(0, 1),
-									size: 4
-								}),
-								$mdgriffith$elm_ui$Element$paddingEach(
-								{bottom: 40, left: 0, right: 0, top: 14})
-							]),
+						_Utils_ap(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$centerX,
+									$mdgriffith$elm_ui$Element$centerY,
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+									$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+									$mdgriffith$elm_ui$Element$Background$color(
+									A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0)),
+									$mdgriffith$elm_ui$Element$Border$rounded(40),
+									$mdgriffith$elm_ui$Element$Border$shadow(
+									{
+										blur: 20,
+										color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
+										offset: _Utils_Tuple2(0, 1),
+										size: 4
+									}),
+									$mdgriffith$elm_ui$Element$paddingEach(
+									{bottom: 40, left: 0, right: 0, top: 14})
+								]),
+							mobile ? _List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$scale(0.8)
+								]) : _List_Nil),
 						A2(
 							$mdgriffith$elm_ui$Element$column,
 							_List_fromArray(
@@ -33204,7 +33209,7 @@ var $author$project$Main$view = function (model) {
 									_List_fromArray(
 										[
 											$mdgriffith$elm_ui$Element$inFront(
-											A4($author$project$Main$premium, model.displayPremium, model.phoneNumber, model.validPhone, model.premiumSuccess))
+											A5($author$project$Main$premium, isMobile, model.displayPremium, model.phoneNumber, model.validPhone, model.premiumSuccess))
 										]))),
 							$mdgriffith$elm_ui$Element$html(
 								$author$project$Main$map(model)))

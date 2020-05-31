@@ -732,6 +732,7 @@ view model =
                            )
                         ++ [ Element.inFront
                                 (premium
+                                    isMobile
                                     model.displayPremium
                                     model.phoneNumber
                                     model.validPhone
@@ -1167,8 +1168,8 @@ premiumButton =
         }
 
 
-premium : Bool -> String -> Maybe Bool -> Bool -> Element Msg
-premium displayPremium phoneNum validPhone success =
+premium : Bool -> Bool -> String -> Maybe Bool -> Bool -> Element Msg
+premium mobile displayPremium phoneNum validPhone success =
     if displayPremium then
         Element.el
             [ width fill
@@ -1184,25 +1185,32 @@ premium displayPremium phoneNum validPhone success =
                 )
             , Element.inFront
                 (Element.el
-                    [ centerX
-                    , centerY
-                    , width shrink
-                    , height shrink
-                    , Background.color (Element.rgb255 0 0 0)
-                    , Border.rounded 40
-                    , Border.shadow
+                    ([ centerX
+                     , centerY
+                     , width shrink
+                     , height shrink
+                     , Background.color (Element.rgb255 0 0 0)
+                     , Border.rounded 40
+                     , Border.shadow
                         { offset = ( 0, 1 )
                         , size = 4
                         , blur = 20
                         , color = Element.rgb 0.1 0.1 0.1
                         }
-                    , paddingEach
+                     , paddingEach
                         { top = 14
                         , left = 0
                         , right = 0
                         , bottom = 40
                         }
-                    ]
+                     ]
+                        ++ (if mobile then
+                                [ scale 0.8 ]
+
+                            else
+                                []
+                           )
+                    )
                     (Element.column
                         [ spacing 5 ]
                         [ Input.button
