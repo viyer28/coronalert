@@ -499,10 +499,17 @@ flyIn : Model -> FeatureEntry -> LngLat -> ( Model, Cmd msg )
 flyIn model entry coords =
     if entry.layer.id == "countries" then
         let
+            zoom =
+                if model.device.class == Phone then
+                    3.5
+
+                else
+                    4
+
             lngLat =
                 if model.device.class == Phone then
                     { lng = coords.lng
-                    , lat = coords.lat - 5
+                    , lat = coords.lat - 3
                     }
 
                 else
@@ -515,13 +522,20 @@ flyIn model entry coords =
         , MapCommands.flyTo
             [ Opt.center lngLat
             , Opt.duration 2000
-            , Opt.zoom 4
+            , Opt.zoom zoom
             , Opt.animate True
             ]
         )
 
     else if entry.layer.id == "states" then
         let
+            zoom =
+                if model.device.class == Phone then
+                    5.25
+
+                else
+                    6
+
             lngLat =
                 if model.device.class == Phone then
                     { lng = coords.lng
@@ -538,17 +552,24 @@ flyIn model entry coords =
         , MapCommands.flyTo
             [ Opt.center lngLat
             , Opt.duration 2000
-            , Opt.zoom 6
+            , Opt.zoom zoom
             , Opt.animate True
             ]
         )
 
     else
         let
+            zoom =
+                if model.device.class == Phone then
+                    8
+
+                else
+                    10
+
             lngLat =
                 if model.device.class == Phone then
                     { lng = coords.lng
-                    , lat = coords.lat - 0.075
+                    , lat = coords.lat - 0.15
                     }
 
                 else
@@ -561,7 +582,7 @@ flyIn model entry coords =
         , MapCommands.flyTo
             [ Opt.center lngLat
             , Opt.duration 2000
-            , Opt.zoom 10
+            , Opt.zoom zoom
             , Opt.animate True
             ]
         )

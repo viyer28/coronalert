@@ -12286,7 +12286,8 @@ var $gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom = A2(
 var $author$project$Main$flyIn = F3(
 	function (model, entry, coords) {
 		if (entry.layer.id === 'countries') {
-			var lngLat = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? {lat: coords.lat - 5, lng: coords.lng} : coords;
+			var zoom = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? 3.5 : 4;
+			var lngLat = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? {lat: coords.lat - 3, lng: coords.lng} : coords;
 			return _Utils_Tuple2(
 				_Utils_update(
 					model,
@@ -12299,11 +12300,12 @@ var $author$project$Main$flyIn = F3(
 						[
 							$gampleman$elm_mapbox$Mapbox$Cmd$Option$center(lngLat),
 							$gampleman$elm_mapbox$Mapbox$Cmd$Option$duration(2000),
-							$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(4),
+							$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(zoom),
 							$gampleman$elm_mapbox$Mapbox$Cmd$Option$animate(true)
 						])));
 		} else {
 			if (entry.layer.id === 'states') {
+				var zoom = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? 5.25 : 6;
 				var lngLat = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? {lat: coords.lat - 1, lng: coords.lng} : coords;
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -12317,11 +12319,12 @@ var $author$project$Main$flyIn = F3(
 							[
 								$gampleman$elm_mapbox$Mapbox$Cmd$Option$center(lngLat),
 								$gampleman$elm_mapbox$Mapbox$Cmd$Option$duration(2000),
-								$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(6),
+								$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(zoom),
 								$gampleman$elm_mapbox$Mapbox$Cmd$Option$animate(true)
 							])));
 			} else {
-				var lngLat = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? {lat: coords.lat - 0.075, lng: coords.lng} : coords;
+				var zoom = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? 8 : 10;
+				var lngLat = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? {lat: coords.lat - 0.15, lng: coords.lng} : coords;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -12334,7 +12337,7 @@ var $author$project$Main$flyIn = F3(
 							[
 								$gampleman$elm_mapbox$Mapbox$Cmd$Option$center(lngLat),
 								$gampleman$elm_mapbox$Mapbox$Cmd$Option$duration(2000),
-								$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(10),
+								$gampleman$elm_mapbox$Mapbox$Cmd$Option$zoom(zoom),
 								$gampleman$elm_mapbox$Mapbox$Cmd$Option$animate(true)
 							])));
 			}
