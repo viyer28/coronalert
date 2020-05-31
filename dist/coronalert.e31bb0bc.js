@@ -18954,6 +18954,17 @@ var $mdgriffith$elm_ui$Element$padding = function (x) {
 };
 var $author$project$Main$red = A3($mdgriffith$elm_ui$Element$rgb255, 254, 127, 156);
 var $mdgriffith$elm_ui$Element$Font$regular = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textNormalWeight);
+var $mdgriffith$elm_ui$Internal$Model$Scale = function (a) {
+	return {$: 'Scale', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$scale = $mdgriffith$elm_ui$Internal$Flag$flag(23);
+var $mdgriffith$elm_ui$Element$scale = function (n) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$scale,
+		$mdgriffith$elm_ui$Internal$Model$Scale(
+			_Utils_Tuple3(n, n, 1)));
+};
 var $mdgriffith$elm_ui$Internal$Model$FontSize = function (a) {
 	return {$: 'FontSize', a: a};
 };
@@ -20152,8 +20163,8 @@ var $author$project$Main$titleLabel = F2(
 		return _Utils_Tuple2('', '');
 	});
 var $author$project$Main$yellow = A3($mdgriffith$elm_ui$Element$rgb255, 250, 218, 94);
-var $author$project$Main$clickView = F4(
-	function (phoneNum, validPhone, invalidSub, entry) {
+var $author$project$Main$clickView = F5(
+	function (mobile, phoneNum, validPhone, invalidSub, entry) {
 		if (entry.$ === 'Nothing') {
 			return $mdgriffith$elm_ui$Element$none;
 		} else {
@@ -20165,26 +20176,36 @@ var $author$project$Main$clickView = F4(
 			var subtitle = _v1.b;
 			return A2(
 				$mdgriffith$elm_ui$Element$el,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$alignLeft,
-						$mdgriffith$elm_ui$Element$alignBottom,
-						$mdgriffith$elm_ui$Element$moveUp(25),
-						$mdgriffith$elm_ui$Element$moveRight(25),
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-						$mdgriffith$elm_ui$Element$Background$color(
-						A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
-						$mdgriffith$elm_ui$Element$Border$shadow(
-						{
-							blur: 20,
-							color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
-							offset: _Utils_Tuple2(0, 1),
-							size: 4
-						}),
-						$mdgriffith$elm_ui$Element$Border$rounded(35),
-						$mdgriffith$elm_ui$Element$padding(25)
-					]),
+				_Utils_ap(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+							$mdgriffith$elm_ui$Element$Background$color(
+							A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
+							$mdgriffith$elm_ui$Element$Border$shadow(
+							{
+								blur: 20,
+								color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
+								offset: _Utils_Tuple2(0, 1),
+								size: 4
+							}),
+							$mdgriffith$elm_ui$Element$Border$rounded(35),
+							$mdgriffith$elm_ui$Element$padding(25)
+						]),
+					mobile ? _List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$alignBottom,
+							$mdgriffith$elm_ui$Element$moveUp(25),
+							$mdgriffith$elm_ui$Element$scale(0.8)
+						]) : _List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$alignLeft,
+							$mdgriffith$elm_ui$Element$alignBottom,
+							$mdgriffith$elm_ui$Element$moveUp(25),
+							$mdgriffith$elm_ui$Element$moveRight(25)
+						])),
 				A2(
 					$mdgriffith$elm_ui$Element$column,
 					_List_fromArray(
@@ -20317,17 +20338,6 @@ var $mdgriffith$elm_ui$Element$row = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
-var $mdgriffith$elm_ui$Internal$Model$Scale = function (a) {
-	return {$: 'Scale', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Flag$scale = $mdgriffith$elm_ui$Internal$Flag$flag(23);
-var $mdgriffith$elm_ui$Element$scale = function (n) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
-		$mdgriffith$elm_ui$Internal$Flag$scale,
-		$mdgriffith$elm_ui$Internal$Model$Scale(
-			_Utils_Tuple3(n, n, 1)));
-};
 var $author$project$Main$searchEntry = function (entry) {
 	return A2(
 		$mdgriffith$elm_ui$Element$Input$button,
@@ -20538,7 +20548,7 @@ var $author$project$Main$header = F3(
 					A3($mdgriffith$elm_ui$Element$rgb255, 58, 58, 60)),
 					$mdgriffith$elm_ui$Element$Border$width(1),
 					$mdgriffith$elm_ui$Element$paddingEach(
-					{bottom: 0, left: 24, right: 24, top: 0}),
+					{bottom: 0, left: 29, right: 29, top: 0}),
 					$mdgriffith$elm_ui$Element$clip,
 					$mdgriffith$elm_ui$Element$inFront(
 					A2(
@@ -20600,7 +20610,7 @@ var $author$project$Main$header = F3(
 							_List_fromArray(
 								[
 									$mdgriffith$elm_ui$Element$moveUp(6),
-									$mdgriffith$elm_ui$Element$Font$size(16)
+									$mdgriffith$elm_ui$Element$Font$size(15)
 								]),
 							$mdgriffith$elm_ui$Element$text('search a county, state, or country'))),
 					text: searchTerm
@@ -33157,7 +33167,7 @@ var $author$project$Main$view = function (model) {
 										$mdgriffith$elm_ui$Element$inFront(
 										A2($author$project$Main$hoverView, model.hoverPoint, model.hoveredEntry)),
 										$mdgriffith$elm_ui$Element$inFront(
-										A4($author$project$Main$clickView, model.phoneNumber, model.validPhone, model.invalidSub, model.clickedEntry)),
+										A5($author$project$Main$clickView, isMobile, model.phoneNumber, model.validPhone, model.invalidSub, model.clickedEntry)),
 										$mdgriffith$elm_ui$Element$inFront(
 										A3($author$project$Main$header, isMobile, model.search, model.searchResults))
 									]),

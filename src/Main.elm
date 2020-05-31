@@ -684,7 +684,7 @@ view model =
                      , Element.inFront
                         (hoverView model.hoverPoint model.hoveredEntry)
                      , Element.inFront
-                        (clickView model.phoneNumber model.validPhone model.invalidSub model.clickedEntry)
+                        (clickView isMobile model.phoneNumber model.validPhone model.invalidSub model.clickedEntry)
                      , Element.inFront
                         (header isMobile model.search model.searchResults)
                      ]
@@ -741,7 +741,7 @@ header mobile searchTerm searchResults =
                     , Background.color (Element.rgb 0 0 0)
                     , Border.color (Element.rgb255 58 58 60)
                     , Border.width 1
-                    , paddingEach { top = 0, bottom = 0, left = 24, right = 24 }
+                    , paddingEach { top = 0, bottom = 0, left = 29, right = 29 }
                     , clip
                     , Element.inFront
                         (Element.image
@@ -782,7 +782,7 @@ header mobile searchTerm searchResults =
                         , onChange =
                             \new -> Search new
                         , placeholder =
-                            Just (Input.placeholder [ moveUp 6, Font.size 16 ] (Element.text "search a county, state, or country"))
+                            Just (Input.placeholder [ moveUp 6, Font.size 15 ] (Element.text "search a county, state, or country"))
                         , text = searchTerm
                         }
                     )
@@ -1695,8 +1695,8 @@ titleLabel layer properties =
             ( "", "" )
 
 
-clickView : String -> Maybe Bool -> Maybe Bool -> Maybe FeatureEntry -> Element Msg
-clickView phoneNum validPhone invalidSub entry =
+clickView : Bool -> String -> Maybe Bool -> Maybe Bool -> Maybe FeatureEntry -> Element Msg
+clickView mobile phoneNum validPhone invalidSub entry =
     case entry of
         Nothing ->
             Element.none
@@ -1707,22 +1707,33 @@ clickView phoneNum validPhone invalidSub entry =
                     titleLabel layer properties
             in
             Element.el
-                [ alignLeft
-                , alignBottom
-                , moveUp 25
-                , moveRight 25
-                , width shrink
-                , height shrink
-                , Background.color (Element.rgb 0 0 0)
-                , Border.shadow
+                ([ width shrink
+                 , height shrink
+                 , Background.color (Element.rgb 0 0 0)
+                 , Border.shadow
                     { offset = ( 0, 1 )
                     , size = 4
                     , blur = 20
                     , color = Element.rgb 0.1 0.1 0.1
                     }
-                , Border.rounded 35
-                , padding 25
-                ]
+                 , Border.rounded 35
+                 , padding 25
+                 ]
+                    ++ (if mobile then
+                            [ centerX
+                            , alignBottom
+                            , moveUp 25
+                            , scale 0.8
+                            ]
+
+                        else
+                            [ alignLeft
+                            , alignBottom
+                            , moveUp 25
+                            , moveRight 25
+                            ]
+                       )
+                )
                 (Element.column
                     [ spacing 5
                     , centerX
