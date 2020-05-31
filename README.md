@@ -1,6 +1,8 @@
 # Coronalert 🚨
-The COVID Map with Text Alerts <br>
-[See the live website](https://www.coronalert.live)
+## The COVID Map with Text Alerts
+Written in Elm (with a touch of Javascript) <br>
+Uses Cloud Firestore, Cloud Functions, Stripe and Twilio APIs <br>
+[See the live website!](https://www.coronalert.live)
 
 ## Instructions
 Use Parcel to build:
