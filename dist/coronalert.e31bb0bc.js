@@ -20527,7 +20527,6 @@ var $author$project$Main$header = F3(
 		var constraints = mobile ? _List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$centerX,
-				$mdgriffith$elm_ui$Element$scale(0.8),
 				$mdgriffith$elm_ui$Element$alignTop,
 				$mdgriffith$elm_ui$Element$moveDown(25)
 			]) : _List_fromArray(
@@ -20542,35 +20541,47 @@ var $author$project$Main$header = F3(
 			constraints,
 			A2(
 				$mdgriffith$elm_ui$Element$column,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-						$mdgriffith$elm_ui$Element$spacing(13)
-					]),
+				_Utils_ap(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink)
+						]),
+					mobile ? _List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$spacing(8)
+						]) : _List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$spacing(13)
+						])),
 				_List_fromArray(
 					[
 						A2(
 						$mdgriffith$elm_ui$Element$column,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$px(385)),
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-								$mdgriffith$elm_ui$Element$centerX,
-								$mdgriffith$elm_ui$Element$spacing(10),
-								$mdgriffith$elm_ui$Element$Background$color(
-								A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
-								$mdgriffith$elm_ui$Element$Border$shadow(
-								{
-									blur: 15,
-									color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
-									offset: _Utils_Tuple2(0, 1),
-									size: 4
-								}),
-								$mdgriffith$elm_ui$Element$Border$rounded(25),
-								$mdgriffith$elm_ui$Element$padding(25)
-							]),
+						_Utils_ap(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width(
+									$mdgriffith$elm_ui$Element$px(385)),
+									$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+									$mdgriffith$elm_ui$Element$centerX,
+									$mdgriffith$elm_ui$Element$spacing(10),
+									$mdgriffith$elm_ui$Element$Background$color(
+									A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
+									$mdgriffith$elm_ui$Element$Border$shadow(
+									{
+										blur: 15,
+										color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
+										offset: _Utils_Tuple2(0, 1),
+										size: 4
+									}),
+									$mdgriffith$elm_ui$Element$Border$rounded(25),
+									$mdgriffith$elm_ui$Element$padding(25)
+								]),
+							mobile ? _List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$scale(0.9)
+								]) : _List_Nil),
 						_List_fromArray(
 							[
 								A2(
@@ -20602,45 +20613,54 @@ var $author$project$Main$header = F3(
 							])),
 						A2(
 						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$behindContent(
-								A2(
-									$mdgriffith$elm_ui$Element$el,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-											$mdgriffith$elm_ui$Element$height(
-											$mdgriffith$elm_ui$Element$px(
-												($elm$core$List$length(searchDisplay) * 40) + 20)),
-											$mdgriffith$elm_ui$Element$moveDown(20),
-											$mdgriffith$elm_ui$Element$Border$roundEach(
-											{bottomLeft: 20, bottomRight: 20, topLeft: 0, topRight: 0}),
-											$mdgriffith$elm_ui$Element$Border$shadow(
-											{
-												blur: 15,
-												color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
-												offset: _Utils_Tuple2(0, 1),
-												size: 4
-											}),
-											$mdgriffith$elm_ui$Element$Background$color(
-											A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0)),
-											$mdgriffith$elm_ui$Element$clip
-										]),
+						_Utils_ap(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$behindContent(
 									A2(
-										$mdgriffith$elm_ui$Element$column,
+										$mdgriffith$elm_ui$Element$el,
 										_List_fromArray(
 											[
 												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 												$mdgriffith$elm_ui$Element$height(
 												$mdgriffith$elm_ui$Element$px(
-													$elm$core$List$length(searchDisplay) * 40)),
-												$mdgriffith$elm_ui$Element$moveDown(20)
+													($elm$core$List$length(searchDisplay) * 40) + 20)),
+												$mdgriffith$elm_ui$Element$moveDown(20),
+												$mdgriffith$elm_ui$Element$Border$roundEach(
+												{bottomLeft: 20, bottomRight: 20, topLeft: 0, topRight: 0}),
+												$mdgriffith$elm_ui$Element$Border$shadow(
+												{
+													blur: 15,
+													color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
+													offset: _Utils_Tuple2(0, 1),
+													size: 4
+												}),
+												$mdgriffith$elm_ui$Element$Background$color(
+												A3($mdgriffith$elm_ui$Element$rgb255, 0, 0, 0)),
+												$mdgriffith$elm_ui$Element$clip
 											]),
-										A2($elm$core$List$map, $author$project$Main$searchEntry, searchDisplay))))
-							]),
+										A2(
+											$mdgriffith$elm_ui$Element$column,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+													$mdgriffith$elm_ui$Element$height(
+													$mdgriffith$elm_ui$Element$px(
+														$elm$core$List$length(searchDisplay) * 40)),
+													$mdgriffith$elm_ui$Element$moveDown(20)
+												]),
+											A2($elm$core$List$map, $author$project$Main$searchEntry, searchDisplay))))
+								]),
+							mobile ? _List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width(
+									$mdgriffith$elm_ui$Element$px(300)),
+									$mdgriffith$elm_ui$Element$centerX
+								]) : _List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+								])),
 						A2(
 							$mdgriffith$elm_ui$Element$row,
 							_List_fromArray(
