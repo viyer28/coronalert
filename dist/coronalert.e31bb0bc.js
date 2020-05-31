@@ -18737,37 +18737,6 @@ var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
 			'border-radius',
 			$elm$core$String$fromInt(radius) + 'px'));
 };
-var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
-var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
-var $mdgriffith$elm_ui$Element$row = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asRow,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
-var $mdgriffith$elm_ui$Internal$Model$Scale = function (a) {
-	return {$: 'Scale', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Flag$scale = $mdgriffith$elm_ui$Internal$Flag$flag(23);
-var $mdgriffith$elm_ui$Element$scale = function (n) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
-		$mdgriffith$elm_ui$Internal$Flag$scale,
-		$mdgriffith$elm_ui$Internal$Model$Scale(
-			_Utils_Tuple3(n, n, 1)));
-};
 var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
 	return $elm$core$String$concat(
 		_List_fromArray(
@@ -18811,8 +18780,19 @@ var $mdgriffith$elm_ui$Element$spacing = function (x) {
 			x,
 			x));
 };
-var $author$project$Main$actions = function (mobile) {
-	var buttons = _List_fromArray(
+var $author$project$Main$actions = A2(
+	$mdgriffith$elm_ui$Element$column,
+	_List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+			$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+			$mdgriffith$elm_ui$Element$alignRight,
+			$mdgriffith$elm_ui$Element$moveLeft(25),
+			$mdgriffith$elm_ui$Element$alignTop,
+			$mdgriffith$elm_ui$Element$moveDown(25),
+			$mdgriffith$elm_ui$Element$spacing(10)
+		]),
+	_List_fromArray(
 		[
 			A2(
 			$mdgriffith$elm_ui$Element$newTabLink,
@@ -18903,33 +18883,7 @@ var $author$project$Main$actions = function (mobile) {
 					{description: 'premium button', src: ' https://raw.githubusercontent.com/viyer28/coronalert/master/premium_icon.png'}),
 				onPress: $elm$core$Maybe$Just($author$project$Main$ClickPremium)
 			})
-		]);
-	return mobile ? A2(
-		$mdgriffith$elm_ui$Element$row,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-				$mdgriffith$elm_ui$Element$centerX,
-				$mdgriffith$elm_ui$Element$spacing(375),
-				$mdgriffith$elm_ui$Element$alignTop,
-				$mdgriffith$elm_ui$Element$moveDown(117),
-				$mdgriffith$elm_ui$Element$scale(0.7)
-			]),
-		buttons) : A2(
-		$mdgriffith$elm_ui$Element$column,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-				$mdgriffith$elm_ui$Element$alignRight,
-				$mdgriffith$elm_ui$Element$moveLeft(25),
-				$mdgriffith$elm_ui$Element$alignTop,
-				$mdgriffith$elm_ui$Element$moveDown(25),
-				$mdgriffith$elm_ui$Element$spacing(10)
-			]),
-		buttons);
-};
+		]));
 var $mdgriffith$elm_ui$Internal$Model$Bottom = {$: 'Bottom'};
 var $mdgriffith$elm_ui$Element$alignBottom = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Bottom);
 var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
@@ -19085,6 +19039,8 @@ var $mdgriffith$elm_ui$Element$Input$TextInputNode = function (a) {
 var $mdgriffith$elm_ui$Element$Input$TextArea = {$: 'TextArea'};
 var $mdgriffith$elm_ui$Internal$Model$LivePolite = {$: 'LivePolite'};
 var $mdgriffith$elm_ui$Element$Region$announce = $mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$LivePolite);
+var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
+var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
 var $mdgriffith$elm_ui$Element$Input$applyLabel = F3(
 	function (attrs, label, input) {
 		if (label.$ === 'HiddenLabel') {
@@ -20343,6 +20299,35 @@ var $mdgriffith$elm_ui$Element$Border$roundEach = function (_v0) {
 			'border-radius',
 			$elm$core$String$fromInt(topLeft) + ('px ' + ($elm$core$String$fromInt(topRight) + ('px ' + ($elm$core$String$fromInt(bottomRight) + ('px ' + ($elm$core$String$fromInt(bottomLeft) + 'px'))))))));
 };
+var $mdgriffith$elm_ui$Element$row = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asRow,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $mdgriffith$elm_ui$Internal$Model$Scale = function (a) {
+	return {$: 'Scale', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$scale = $mdgriffith$elm_ui$Internal$Flag$flag(23);
+var $mdgriffith$elm_ui$Element$scale = function (n) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$scale,
+		$mdgriffith$elm_ui$Internal$Model$Scale(
+			_Utils_Tuple3(n, n, 1)));
+};
 var $author$project$Main$searchEntry = function (entry) {
 	return A2(
 		$mdgriffith$elm_ui$Element$Input$button,
@@ -21460,6 +21445,14 @@ var $author$project$Main$countySize = F2(
 				]),
 			$gampleman$elm_mapbox$Mapbox$Expression$zoom);
 	});
+var $gampleman$elm_mapbox$Mapbox$Style$MiscAttr = F2(
+	function (a, b) {
+		return {$: 'MiscAttr', a: a, b: b};
+	});
+var $gampleman$elm_mapbox$Mapbox$Style$defaultZoomLevel = A2(
+	$elm$core$Basics$composeR,
+	$elm$json$Json$Encode$float,
+	$gampleman$elm_mapbox$Mapbox$Style$MiscAttr('zoom'));
 var $elm_community$maybe_extra$Maybe$Extra$unwrap = F3(
 	function (_default, f, m) {
 		if (m.$ === 'Nothing') {
@@ -22022,10 +22015,6 @@ var $gampleman$elm_mapbox$Mapbox$Expression$butt = $gampleman$elm_mapbox$Interna
 	$elm$json$Json$Encode$string('butt'));
 var $gampleman$elm_mapbox$Mapbox$Expression$center = $gampleman$elm_mapbox$Internal$Expression(
 	$elm$json$Json$Encode$string('center'));
-var $gampleman$elm_mapbox$Mapbox$Style$MiscAttr = F2(
-	function (a, b) {
-		return {$: 'MiscAttr', a: a, b: b};
-	});
 var $gampleman$elm_mapbox$Mapbox$Style$defaultBearing = A2(
 	$elm$core$Basics$composeR,
 	$elm$json$Json$Encode$float,
@@ -22060,10 +22049,6 @@ var $gampleman$elm_mapbox$Mapbox$Style$defaultPitch = A2(
 	$elm$json$Json$Encode$float,
 	$gampleman$elm_mapbox$Mapbox$Style$MiscAttr('pitch'));
 var $gampleman$elm_mapbox$Mapbox$Style$defaultTransition = {delay: 0, duration: 300};
-var $gampleman$elm_mapbox$Mapbox$Style$defaultZoomLevel = A2(
-	$elm$core$Basics$composeR,
-	$elm$json$Json$Encode$float,
-	$gampleman$elm_mapbox$Mapbox$Style$MiscAttr('zoom'));
 var $gampleman$elm_mapbox$Mapbox$Expression$bool = function (b) {
 	return $gampleman$elm_mapbox$Internal$Expression(
 		$elm$json$Json$Encode$bool(b));
@@ -22367,8 +22352,8 @@ var $gampleman$elm_mapbox$Mapbox$Source$vectorFromUrl = F2(
 						$elm$json$Json$Encode$string(url))
 					])));
 	});
-var $author$project$Styles$Dark$styleWithAttr = F2(
-	function (sources, layers) {
+var $author$project$Styles$Dark$styleWithAttr = F3(
+	function (sources, layers, initZoomLevel) {
 		return $gampleman$elm_mapbox$Mapbox$Style$Style(
 			{
 				layers: _Utils_ap(
@@ -32319,17 +32304,18 @@ var $author$project$Styles$Dark$styleWithAttr = F2(
 						]),
 					layers),
 				light: $gampleman$elm_mapbox$Mapbox$Style$defaultLight,
-				misc: _List_fromArray(
-					[
-						$gampleman$elm_mapbox$Mapbox$Style$sprite('mapbox://sprites/mapbox/dark-v9'),
-						$gampleman$elm_mapbox$Mapbox$Style$glyphs('mapbox://fonts/mapbox/{fontstack}/{range}.pbf'),
-						$gampleman$elm_mapbox$Mapbox$Style$name('Mapbox Dark'),
-						$gampleman$elm_mapbox$Mapbox$Style$defaultZoomLevel(3.25),
-						$gampleman$elm_mapbox$Mapbox$Style$defaultBearing(0),
-						$gampleman$elm_mapbox$Mapbox$Style$defaultPitch(0),
-						$gampleman$elm_mapbox$Mapbox$Style$defaultCenter(
-						A2($gampleman$elm_mapbox$LngLat$LngLat, -95, 41))
-					]),
+				misc: _Utils_ap(
+					_List_fromArray(
+						[
+							$gampleman$elm_mapbox$Mapbox$Style$sprite('mapbox://sprites/mapbox/dark-v9'),
+							$gampleman$elm_mapbox$Mapbox$Style$glyphs('mapbox://fonts/mapbox/{fontstack}/{range}.pbf'),
+							$gampleman$elm_mapbox$Mapbox$Style$name('Mapbox Dark'),
+							$gampleman$elm_mapbox$Mapbox$Style$defaultBearing(0),
+							$gampleman$elm_mapbox$Mapbox$Style$defaultPitch(0),
+							$gampleman$elm_mapbox$Mapbox$Style$defaultCenter(
+							A2($gampleman$elm_mapbox$LngLat$LngLat, -95, 41))
+						]),
+					initZoomLevel),
 				sources: A2(
 					$elm$core$List$cons,
 					A2($gampleman$elm_mapbox$Mapbox$Source$vectorFromUrl, 'composite', 'mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7'),
@@ -32341,6 +32327,13 @@ var $author$project$Main$map = function (model) {
 	var noHoverOption = (_Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) || _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Tablet)) ? _List_Nil : _List_fromArray(
 		[
 			$gampleman$elm_mapbox$Mapbox$Element$onMouseMove($author$project$Main$Hover)
+		]);
+	var initialZoom = _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) ? _List_fromArray(
+		[
+			$gampleman$elm_mapbox$Mapbox$Style$defaultZoomLevel(2.5)
+		]) : _List_fromArray(
+		[
+			$gampleman$elm_mapbox$Mapbox$Style$defaultZoomLevel(3.25)
 		]);
 	return A2(
 		$elm$html$Html$div,
@@ -32364,7 +32357,7 @@ var $author$project$Main$map = function (model) {
 							$author$project$Main$hoverFeature(model.hoveredFeature)
 						]),
 					noHoverOption),
-				A2(
+				A3(
 					$author$project$Styles$Dark$styleWithAttr,
 					_List_fromArray(
 						[
@@ -32439,7 +32432,8 @@ var $author$project$Main$map = function (model) {
 									$gampleman$elm_mapbox$Mapbox$Layer$circleColor($author$project$Main$featureColor),
 									$gampleman$elm_mapbox$Mapbox$Layer$circleOpacity($author$project$Main$countryOpacity)
 								]))
-						])))
+						]),
+					initialZoom))
 			]));
 };
 var $mdgriffith$elm_ui$Internal$Model$HoverOption = function (a) {
@@ -32952,6 +32946,103 @@ var $author$project$Main$premium = F4(
 				]),
 			$mdgriffith$elm_ui$Element$none) : $mdgriffith$elm_ui$Element$none;
 	});
+var $author$project$Main$premiumButton = A2(
+	$mdgriffith$elm_ui$Element$Input$button,
+	_List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$width(
+			$mdgriffith$elm_ui$Element$px(30)),
+			$mdgriffith$elm_ui$Element$height(
+			$mdgriffith$elm_ui$Element$px(30)),
+			$mdgriffith$elm_ui$Element$centerX,
+			$mdgriffith$elm_ui$Element$alignTop,
+			$mdgriffith$elm_ui$Element$moveDown(129),
+			$mdgriffith$elm_ui$Element$moveRight(145),
+			$mdgriffith$elm_ui$Element$Background$color(
+			A3($mdgriffith$elm_ui$Element$rgb255, 94, 92, 230)),
+			$mdgriffith$elm_ui$Element$Border$rounded(25),
+			$mdgriffith$elm_ui$Element$clip,
+			$mdgriffith$elm_ui$Element$Border$shadow(
+			{
+				blur: 15,
+				color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
+				offset: _Utils_Tuple2(0, 1),
+				size: 2
+			}),
+			$mdgriffith$elm_ui$Element$mouseOver(
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Background$color(
+					A3($mdgriffith$elm_ui$Element$rgb255, 111, 109, 232))
+				])),
+			$mdgriffith$elm_ui$Element$focused(
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Border$color(
+					A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0))
+				]))
+		]),
+	{
+		label: A2(
+			$mdgriffith$elm_ui$Element$image,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$centerY,
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(12))
+				]),
+			{description: 'premium button', src: ' https://raw.githubusercontent.com/viyer28/coronalert/master/premium_icon.png'}),
+		onPress: $elm$core$Maybe$Just($author$project$Main$ClickPremium)
+	});
+var $author$project$Main$shareButton = A2(
+	$mdgriffith$elm_ui$Element$newTabLink,
+	_List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$width(
+			$mdgriffith$elm_ui$Element$px(30)),
+			$mdgriffith$elm_ui$Element$height(
+			$mdgriffith$elm_ui$Element$px(30)),
+			$mdgriffith$elm_ui$Element$centerX,
+			$mdgriffith$elm_ui$Element$alignTop,
+			$mdgriffith$elm_ui$Element$moveDown(129),
+			$mdgriffith$elm_ui$Element$moveLeft(145),
+			$mdgriffith$elm_ui$Element$Background$color($author$project$Main$blue),
+			$mdgriffith$elm_ui$Element$Border$rounded(25),
+			$mdgriffith$elm_ui$Element$clip,
+			$mdgriffith$elm_ui$Element$Border$shadow(
+			{
+				blur: 15,
+				color: A3($mdgriffith$elm_ui$Element$rgb, 0.1, 0.1, 0.1),
+				offset: _Utils_Tuple2(0, 1),
+				size: 2
+			}),
+			$mdgriffith$elm_ui$Element$mouseOver(
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Background$color(
+					A3($mdgriffith$elm_ui$Element$rgb255, 51, 153, 255))
+				])),
+			$mdgriffith$elm_ui$Element$focused(
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Border$color(
+					A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0))
+				]))
+		]),
+	{
+		label: A2(
+			$mdgriffith$elm_ui$Element$image,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$centerY,
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(12))
+				]),
+			{description: 'share button', src: 'https://raw.githubusercontent.com/viyer28/coronalert/master/share_icon.png'}),
+		url: 'https://twitter.com/intent/tweet?url=https%3A%2F%2Fwww.coronalert.live&text=Check%20out%20Coronalert%20-%20the%20COVID%20map%20with%20text%20alerts.%20Stay%20safe%2C%20stay%20alert%21&hashtags=COVID%2Ccoronavirus'
+	});
 var $author$project$Main$view = function (model) {
 	var noHoverOption = (_Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Phone) || _Utils_eq(model.device._class, $mdgriffith$elm_ui$Element$Tablet)) ? _List_fromArray(
 		[$mdgriffith$elm_ui$Element$noHover]) : _List_Nil;
@@ -32977,21 +33068,32 @@ var $author$project$Main$view = function (model) {
 						[
 							A2(
 							$mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$inFront(
-									A2($author$project$Main$hoverView, model.hoverPoint, model.hoveredEntry)),
-									$mdgriffith$elm_ui$Element$inFront(
-									A4($author$project$Main$clickView, model.phoneNumber, model.validPhone, model.invalidSub, model.clickedEntry)),
-									$mdgriffith$elm_ui$Element$inFront(
-									A3($author$project$Main$header, isMobile, model.search, model.searchResults)),
-									$mdgriffith$elm_ui$Element$inFront(
-									$author$project$Main$actions(isMobile)),
-									$mdgriffith$elm_ui$Element$inFront(
-									A4($author$project$Main$premium, model.displayPremium, model.phoneNumber, model.validPhone, model.premiumSuccess)),
-									$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-								]),
+							_Utils_ap(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$inFront(
+										A2($author$project$Main$hoverView, model.hoverPoint, model.hoveredEntry)),
+										$mdgriffith$elm_ui$Element$inFront(
+										A4($author$project$Main$clickView, model.phoneNumber, model.validPhone, model.invalidSub, model.clickedEntry)),
+										$mdgriffith$elm_ui$Element$inFront(
+										A3($author$project$Main$header, isMobile, model.search, model.searchResults))
+									]),
+								_Utils_ap(
+									isMobile ? _List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$inFront($author$project$Main$shareButton),
+											$mdgriffith$elm_ui$Element$inFront($author$project$Main$premiumButton)
+										]) : _List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$inFront($author$project$Main$actions)
+										]),
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$inFront(
+											A4($author$project$Main$premium, model.displayPremium, model.phoneNumber, model.validPhone, model.premiumSuccess))
+										]))),
 							$mdgriffith$elm_ui$Element$html(
 								$author$project$Main$map(model)))
 						])))

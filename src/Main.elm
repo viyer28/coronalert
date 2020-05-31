@@ -23,6 +23,7 @@ import Mapbox.Element exposing (..)
 import Mapbox.Expression as Expr
 import Mapbox.Layer as Layer
 import Mapbox.Source as Source
+import Mapbox.Style as Style
 import Maybe.Extra as Extra
 import PhoneNumber
 import PhoneNumber.Countries
@@ -678,24 +679,32 @@ view model =
                 , Background.color (Element.rgb 0 0 0)
                 ]
                 [ Element.el
-                    [ Element.inFront
+                    ([ height fill
+                     , width fill
+                     , Element.inFront
                         (hoverView model.hoverPoint model.hoveredEntry)
-                    , Element.inFront
+                     , Element.inFront
                         (clickView model.phoneNumber model.validPhone model.invalidSub model.clickedEntry)
-                    , Element.inFront
+                     , Element.inFront
                         (header isMobile model.search model.searchResults)
-                    , Element.inFront
-                        (actions isMobile)
-                    , Element.inFront
-                        (premium
-                            model.displayPremium
-                            model.phoneNumber
-                            model.validPhone
-                            model.premiumSuccess
-                        )
-                    , height fill
-                    , width fill
-                    ]
+                     ]
+                        ++ (if isMobile then
+                                [ Element.inFront shareButton
+                                , Element.inFront premiumButton
+                                ]
+
+                            else
+                                [ Element.inFront actions ]
+                           )
+                        ++ [ Element.inFront
+                                (premium
+                                    model.displayPremium
+                                    model.phoneNumber
+                                    model.validPhone
+                                    model.premiumSuccess
+                                )
+                           ]
+                    )
                     (Element.html (map model))
                 ]
             )
@@ -919,94 +928,152 @@ searchEntry entry =
         }
 
 
-actions : Bool -> Element Msg
-actions mobile =
-    let
-        buttons =
-            [ Element.newTabLink
-                [ width (px 50)
-                , height (px 50)
-                , Background.color blue
-                , Border.rounded 25
-                , clip
-                , Border.shadow
-                    { offset = ( 0, 1 )
-                    , size = 2
-                    , blur = 15
-                    , color = Element.rgb 0.1 0.1 0.1
-                    }
-                , mouseOver
-                    [ Background.color
-                        (Element.rgb255 51 153 255)
-                    ]
-                , Element.focused [ Border.color (Element.rgba 0 0 0 0) ]
-                ]
-                { url = "https://twitter.com/intent/tweet?url=https%3A%2F%2Fwww.coronalert.live&text=Check%20out%20Coronalert%20-%20the%20COVID%20map%20with%20text%20alerts.%20Stay%20safe%2C%20stay%20alert%21&hashtags=COVID%2Ccoronavirus"
-                , label =
-                    Element.image
-                        [ centerY
-                        , centerX
-                        , height (px 20)
-                        ]
-                        { src = "https://raw.githubusercontent.com/viyer28/coronalert/master/share_icon.png"
-                        , description = "share button"
-                        }
+actions : Element Msg
+actions =
+    Element.column
+        [ width shrink
+        , height shrink
+        , alignRight
+        , moveLeft 25
+        , alignTop
+        , moveDown 25
+        , spacing 10
+        ]
+        [ Element.newTabLink
+            [ width (px 50)
+            , height (px 50)
+            , Background.color blue
+            , Border.rounded 25
+            , clip
+            , Border.shadow
+                { offset = ( 0, 1 )
+                , size = 2
+                , blur = 15
+                , color = Element.rgb 0.1 0.1 0.1
                 }
-            , Input.button
-                [ width (px 50)
-                , height (px 50)
-                , Background.color (Element.rgb255 94 92 230)
-                , Border.rounded 25
-                , clip
-                , Border.shadow
-                    { offset = ( 0, 1 )
-                    , size = 2
-                    , blur = 15
-                    , color = Element.rgb 0.1 0.1 0.1
-                    }
-                , mouseOver
-                    [ Background.color
-                        (Element.rgb255 111 109 232)
-                    ]
-                , Element.focused
-                    [ Border.color (Element.rgba 0 0 0 0) ]
+            , mouseOver
+                [ Background.color
+                    (Element.rgb255 51 153 255)
                 ]
-                { onPress = Just ClickPremium
-                , label =
-                    Element.image
-                        [ centerY
-                        , centerX
-                        , height (px 20)
-                        ]
-                        { src = " https://raw.githubusercontent.com/viyer28/coronalert/master/premium_icon.png"
-                        , description = "premium button"
-                        }
+            , Element.focused [ Border.color (Element.rgba 0 0 0 0) ]
+            ]
+            { url = "https://twitter.com/intent/tweet?url=https%3A%2F%2Fwww.coronalert.live&text=Check%20out%20Coronalert%20-%20the%20COVID%20map%20with%20text%20alerts.%20Stay%20safe%2C%20stay%20alert%21&hashtags=COVID%2Ccoronavirus"
+            , label =
+                Element.image
+                    [ centerY
+                    , centerX
+                    , height (px 20)
+                    ]
+                    { src = "https://raw.githubusercontent.com/viyer28/coronalert/master/share_icon.png"
+                    , description = "share button"
+                    }
+            }
+        , Input.button
+            [ width (px 50)
+            , height (px 50)
+            , Background.color (Element.rgb255 94 92 230)
+            , Border.rounded 25
+            , clip
+            , Border.shadow
+                { offset = ( 0, 1 )
+                , size = 2
+                , blur = 15
+                , color = Element.rgb 0.1 0.1 0.1
                 }
+            , mouseOver
+                [ Background.color
+                    (Element.rgb255 111 109 232)
+                ]
+            , Element.focused
+                [ Border.color (Element.rgba 0 0 0 0) ]
             ]
-    in
-    if mobile then
-        Element.row
-            [ width shrink
-            , height shrink
-            , centerX
-            , spacing 375
-            , alignTop
-            , moveDown 117
-            , scale 0.7
-            ]
-            buttons
+            { onPress = Just ClickPremium
+            , label =
+                Element.image
+                    [ centerY
+                    , centerX
+                    , height (px 20)
+                    ]
+                    { src = " https://raw.githubusercontent.com/viyer28/coronalert/master/premium_icon.png"
+                    , description = "premium button"
+                    }
+            }
+        ]
 
-    else
-        Element.column
-            [ width shrink
-            , height shrink
-            , alignRight
-            , moveLeft 25
-            , alignTop
-            , moveDown 25
-            , spacing 10
+
+shareButton : Element Msg
+shareButton =
+    Element.newTabLink
+        [ width (px 30)
+        , height (px 30)
+        , centerX
+        , alignTop
+        , moveDown 129
+        , moveLeft 145
+        , Background.color blue
+        , Border.rounded 25
+        , clip
+        , Border.shadow
+            { offset = ( 0, 1 )
+            , size = 2
+            , blur = 15
+            , color = Element.rgb 0.1 0.1 0.1
+            }
+        , mouseOver
+            [ Background.color
+                (Element.rgb255 51 153 255)
             ]
-            buttons
+        , Element.focused [ Border.color (Element.rgba 0 0 0 0) ]
+        ]
+        { url = "https://twitter.com/intent/tweet?url=https%3A%2F%2Fwww.coronalert.live&text=Check%20out%20Coronalert%20-%20the%20COVID%20map%20with%20text%20alerts.%20Stay%20safe%2C%20stay%20alert%21&hashtags=COVID%2Ccoronavirus"
+        , label =
+            Element.image
+                [ centerY
+                , centerX
+                , height (px 12)
+                ]
+                { src = "https://raw.githubusercontent.com/viyer28/coronalert/master/share_icon.png"
+                , description = "share button"
+                }
+        }
+
+
+premiumButton : Element Msg
+premiumButton =
+    Input.button
+        [ width (px 30)
+        , height (px 30)
+        , centerX
+        , alignTop
+        , moveDown 129
+        , moveRight 145
+        , Background.color (Element.rgb255 94 92 230)
+        , Border.rounded 25
+        , clip
+        , Border.shadow
+            { offset = ( 0, 1 )
+            , size = 2
+            , blur = 15
+            , color = Element.rgb 0.1 0.1 0.1
+            }
+        , mouseOver
+            [ Background.color
+                (Element.rgb255 111 109 232)
+            ]
+        , Element.focused
+            [ Border.color (Element.rgba 0 0 0 0) ]
+        ]
+        { onPress = Just ClickPremium
+        , label =
+            Element.image
+                [ centerY
+                , centerX
+                , height (px 12)
+                ]
+                { src = " https://raw.githubusercontent.com/viyer28/coronalert/master/premium_icon.png"
+                , description = "premium button"
+                }
+        }
 
 
 premium : Bool -> String -> Maybe Bool -> Bool -> Element Msg
@@ -1397,6 +1464,13 @@ map model =
 
             else
                 [ onMouseMove Hover ]
+
+        initialZoom =
+            if model.device.class == Phone then
+                [ Style.defaultZoomLevel 2.5 ]
+
+            else
+                [ Style.defaultZoomLevel 3.25 ]
     in
     div
         [ Html.Attributes.style "height" "100vh" ]
@@ -1453,6 +1527,7 @@ map model =
                     , Layer.circleOpacity countryOpacity
                     ]
                 ]
+                initialZoom
             )
         ]
 

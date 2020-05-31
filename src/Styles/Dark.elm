@@ -4,11 +4,11 @@ import LngLat exposing (LngLat)
 import Mapbox.Expression as E exposing (false, float, str, true)
 import Mapbox.Layer as Layer exposing (Layer)
 import Mapbox.Source as Source exposing (Source)
-import Mapbox.Style as Style exposing (Style(..))
+import Mapbox.Style as Style exposing (Style(..), MiscAttr)
 
 
-styleWithAttr : List Source -> List Layer -> Style
-styleWithAttr sources layers =
+styleWithAttr : List Source -> List Layer -> List MiscAttr -> Style
+styleWithAttr sources layers initZoomLevel =
     Style
         { transition = Style.defaultTransition
         , light = Style.defaultLight
@@ -2885,9 +2885,8 @@ styleWithAttr sources layers =
             [ Style.sprite "mapbox://sprites/mapbox/dark-v9"
             , Style.glyphs "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
             , Style.name "Mapbox Dark"
-            , Style.defaultZoomLevel 3.25
             , Style.defaultBearing 0
             , Style.defaultPitch 0
             , Style.defaultCenter (LngLat -95 41)
-            ]
+            ] ++ initZoomLevel
         }
