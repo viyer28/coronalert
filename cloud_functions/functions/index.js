@@ -11,6 +11,7 @@ const axios = require('axios');
 const db = admin.firestore();
 var _ = require('lodash');
 
+// newSubscriber: sends a messagee to a new subscriber welcoming them to Coronalert (using Twilio)
 exports.newSubscriber = functions.firestore
     .document('/subscribers/{phoneNumber}')
     .onCreate(async (snap, context) => {
@@ -49,6 +50,7 @@ exports.newSubscriber = functions.firestore
         return console.log(message.sid);
     });
 
+// newSubscription: sends a message to a subscriber when he/she subscribes to a new place (using Twilio)
 exports.newSubscription = functions.firestore
     .document('/subscribers/{phoneNumber}')
     .onUpdate(async (change, context) => {
@@ -94,6 +96,7 @@ exports.newSubscription = functions.firestore
         return console.log(message.sid);
     });
 
+// scheduledAlert: sends alert messages to all valid subscribers at 10am CT 
 exports.scheduledAlert =
     functions.pubsub
         .schedule('every day 10:00')
@@ -180,6 +183,7 @@ exports.scheduledAlert =
                 });
         });
 
+// getValidReceivers: determines which subscribers can receive alerts, i.e. premium subscribers and free subscribers who have been subscribed for less than a week
 async function getValidReceivers() {
     const subRef = db.collection("subscribers");
     const isPremium = subRef.where('premium', '==', true).get();

@@ -8,6 +8,7 @@ const token = "pk.eyJ1Ijoic3BvdHRpeWVyIiwiYSI6ImNqZmQyZnVkejIwbGgyd29iZnR3bGVvMX
 
 var stripe = Stripe('pk_live_p5afHJ20fpbPORRrAdHXRfyq00c6LKjfF3');
 
+// Creates main Elm application
 registerCustomElement({ token: token });
 var app = Elm.Main.init({
   node: document.body,
@@ -18,6 +19,7 @@ var app = Elm.Main.init({
 });
 registerPorts(app);
 
+// Initializes Firebase
 firebase.initializeApp({
   apiKey: 'AIzaSyD4rtRUXeVy8jXJzVR7PKP986sunn7jef4',
   authDomain: 'coronalert-a5911.firebaseapp.com',
@@ -26,7 +28,9 @@ firebase.initializeApp({
 
 var db = firebase.firestore()
 
-// ports
+// PORTS
+
+// fireebaseWrite: adds a new subscription to a subscriber
 app.ports.firebaseWrite.subscribe(function (data) {
   var collection = firebase.firestore().collection('subscribers');
 
@@ -67,11 +71,10 @@ app.ports.firebaseWrite.subscribe(function (data) {
   });
 });
 
+// processPremium: launches Stripe checkout for Premium
 app.ports.processPremium.subscribe(function (data) {
   stripe.redirectToCheckout({
     lineItems: [{
-      // Define the product and price in the Dashboard first, and use the price
-      // ID in your client-side code.
       price: 'price_HNSRH0HxhZfHOO',
       quantity: 1
     }],
@@ -81,6 +84,7 @@ app.ports.processPremium.subscribe(function (data) {
   });
 });
 
+// firebaseUpgrade: after successful payment, upgrade account on Firebase
 app.ports.firebaseUpgrade.subscribe(function (data) {
   var collection = firebase.firestore().collection('subscribers');
 
