@@ -20524,6 +20524,173 @@ var $elm$core$List$take = F2(
 var $author$project$Main$header = F3(
 	function (mobile, searchTerm, searchResults) {
 		var searchDisplay = A2($elm$core$List$take, 5, searchResults);
+		var search = mobile ? A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(40)),
+					$mdgriffith$elm_ui$Element$Border$rounded(20),
+					$mdgriffith$elm_ui$Element$Background$color(
+					A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
+					$mdgriffith$elm_ui$Element$Border$color(
+					A3($mdgriffith$elm_ui$Element$rgb255, 58, 58, 60)),
+					$mdgriffith$elm_ui$Element$Border$width(1),
+					$mdgriffith$elm_ui$Element$paddingEach(
+					{bottom: 0, left: 24, right: 24, top: 0}),
+					$mdgriffith$elm_ui$Element$clip,
+					$mdgriffith$elm_ui$Element$inFront(
+					A2(
+						$mdgriffith$elm_ui$Element$image,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$centerY,
+								$mdgriffith$elm_ui$Element$alignLeft,
+								$mdgriffith$elm_ui$Element$moveRight(15),
+								$mdgriffith$elm_ui$Element$height(
+								$mdgriffith$elm_ui$Element$px(15))
+							]),
+						{description: 'search icon', src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTS3q-vOrSdYJMUqjBY-f4SLffkAQVVXo0jCKUuSaIzIiJi4gro&usqp=CAU'}))
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$Input$text,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$centerY,
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$Font$alignLeft,
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(30)),
+						$mdgriffith$elm_ui$Element$Background$color(
+						A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Border$color(
+						A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
+						$mdgriffith$elm_ui$Element$Font$size(16),
+						$mdgriffith$elm_ui$Element$Font$color(
+						A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
+						$mdgriffith$elm_ui$Element$focused(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Border$color(
+								A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0))
+							])),
+						$mdgriffith$elm_ui$Element$moveUp(6),
+						$mdgriffith$elm_ui$Element$Input$focusedOnLoad,
+						$author$project$Main$onEnter(
+						function () {
+							var _v0 = $elm$core$List$head(searchDisplay);
+							if (_v0.$ === 'Nothing') {
+								return $author$project$Main$Noop;
+							} else {
+								var entry = _v0.a;
+								return $author$project$Main$ClickSearch(entry);
+							}
+						}())
+					]),
+				{
+					label: $mdgriffith$elm_ui$Element$Input$labelHidden(''),
+					onChange: function (_new) {
+						return $author$project$Main$Search(_new);
+					},
+					placeholder: $elm$core$Maybe$Just(
+						A2(
+							$mdgriffith$elm_ui$Element$Input$placeholder,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$moveUp(6),
+									$mdgriffith$elm_ui$Element$Font$size(16)
+								]),
+							$mdgriffith$elm_ui$Element$text('search a county, state, or country'))),
+					text: searchTerm
+				})) : A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(40)),
+					$mdgriffith$elm_ui$Element$Border$rounded(20),
+					$mdgriffith$elm_ui$Element$Background$color(
+					A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
+					$mdgriffith$elm_ui$Element$Border$color(
+					A3($mdgriffith$elm_ui$Element$rgb255, 58, 58, 60)),
+					$mdgriffith$elm_ui$Element$Border$width(1),
+					$mdgriffith$elm_ui$Element$spacing(15),
+					$mdgriffith$elm_ui$Element$clip,
+					$mdgriffith$elm_ui$Element$mouseOver(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Background$color(
+							A3($mdgriffith$elm_ui$Element$rgb255, 15, 15, 15))
+						]))
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$image,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$centerY,
+							$mdgriffith$elm_ui$Element$alignLeft,
+							$mdgriffith$elm_ui$Element$moveRight(15),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(15))
+						]),
+					{description: 'search icon', src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTS3q-vOrSdYJMUqjBY-f4SLffkAQVVXo0jCKUuSaIzIiJi4gro&usqp=CAU'}),
+					A2(
+					$mdgriffith$elm_ui$Element$Input$text,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$centerY,
+							$mdgriffith$elm_ui$Element$Font$alignLeft,
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(30)),
+							$mdgriffith$elm_ui$Element$Background$color(
+							A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$Border$color(
+							A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
+							$mdgriffith$elm_ui$Element$Font$size(16),
+							$mdgriffith$elm_ui$Element$Font$color(
+							A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
+							$mdgriffith$elm_ui$Element$focused(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Border$color(
+									A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0))
+								])),
+							$mdgriffith$elm_ui$Element$moveUp(6),
+							$mdgriffith$elm_ui$Element$Input$focusedOnLoad,
+							$author$project$Main$onEnter(
+							function () {
+								var _v1 = $elm$core$List$head(searchDisplay);
+								if (_v1.$ === 'Nothing') {
+									return $author$project$Main$Noop;
+								} else {
+									var entry = _v1.a;
+									return $author$project$Main$ClickSearch(entry);
+								}
+							}())
+						]),
+					{
+						label: $mdgriffith$elm_ui$Element$Input$labelHidden(''),
+						onChange: function (_new) {
+							return $author$project$Main$Search(_new);
+						},
+						placeholder: $elm$core$Maybe$Just(
+							A2(
+								$mdgriffith$elm_ui$Element$Input$placeholder,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$moveUp(6),
+										$mdgriffith$elm_ui$Element$Font$size(16)
+									]),
+								$mdgriffith$elm_ui$Element$text('search a county, state, or country'))),
+						text: searchTerm
+					})
+				]));
 		var constraints = mobile ? _List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$centerX,
@@ -20652,93 +20819,7 @@ var $author$project$Main$header = F3(
 									$mdgriffith$elm_ui$Element$px(300)),
 									$mdgriffith$elm_ui$Element$centerX
 								]) : _List_Nil),
-						A2(
-							$mdgriffith$elm_ui$Element$row,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$height(
-									$mdgriffith$elm_ui$Element$px(40)),
-									$mdgriffith$elm_ui$Element$Border$rounded(20),
-									$mdgriffith$elm_ui$Element$Background$color(
-									A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
-									$mdgriffith$elm_ui$Element$Border$color(
-									A3($mdgriffith$elm_ui$Element$rgb255, 58, 58, 60)),
-									$mdgriffith$elm_ui$Element$Border$width(1),
-									$mdgriffith$elm_ui$Element$spacing(15),
-									$mdgriffith$elm_ui$Element$clip,
-									$mdgriffith$elm_ui$Element$mouseOver(
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$Background$color(
-											A3($mdgriffith$elm_ui$Element$rgb255, 15, 15, 15))
-										]))
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$mdgriffith$elm_ui$Element$image,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$centerY,
-											$mdgriffith$elm_ui$Element$alignLeft,
-											$mdgriffith$elm_ui$Element$moveRight(15),
-											$mdgriffith$elm_ui$Element$height(
-											$mdgriffith$elm_ui$Element$px(15))
-										]),
-									{description: 'search icon', src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTS3q-vOrSdYJMUqjBY-f4SLffkAQVVXo0jCKUuSaIzIiJi4gro&usqp=CAU'}),
-									A2(
-									$mdgriffith$elm_ui$Element$Input$text,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$centerY,
-											$mdgriffith$elm_ui$Element$Font$alignLeft,
-											$mdgriffith$elm_ui$Element$height(
-											$mdgriffith$elm_ui$Element$px(30)),
-											$mdgriffith$elm_ui$Element$Background$color(
-											A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
-											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-											$mdgriffith$elm_ui$Element$Border$color(
-											A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0)),
-											$mdgriffith$elm_ui$Element$Font$size(16),
-											$mdgriffith$elm_ui$Element$Font$color(
-											A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
-											$mdgriffith$elm_ui$Element$focused(
-											_List_fromArray(
-												[
-													$mdgriffith$elm_ui$Element$Border$color(
-													A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0))
-												])),
-											$mdgriffith$elm_ui$Element$moveUp(6),
-											$mdgriffith$elm_ui$Element$Input$focusedOnLoad,
-											$author$project$Main$onEnter(
-											function () {
-												var _v0 = $elm$core$List$head(searchDisplay);
-												if (_v0.$ === 'Nothing') {
-													return $author$project$Main$Noop;
-												} else {
-													var entry = _v0.a;
-													return $author$project$Main$ClickSearch(entry);
-												}
-											}())
-										]),
-									{
-										label: $mdgriffith$elm_ui$Element$Input$labelHidden(''),
-										onChange: function (_new) {
-											return $author$project$Main$Search(_new);
-										},
-										placeholder: $elm$core$Maybe$Just(
-											A2(
-												$mdgriffith$elm_ui$Element$Input$placeholder,
-												_List_fromArray(
-													[
-														$mdgriffith$elm_ui$Element$moveUp(6),
-														$mdgriffith$elm_ui$Element$Font$size(16)
-													]),
-												$mdgriffith$elm_ui$Element$text('search a county, state, or country'))),
-										text: searchTerm
-									})
-								])))
+						search)
 					])));
 	});
 var $author$project$Main$hoverView = F2(
@@ -57605,12 +57686,6 @@ var app = _Main.Elm.Main.init({
 });
 
 (0, _elmMapbox.registerPorts)(app);
-
-input.onfocus = function () {
-  window.scrollTo(0, 0);
-  document.body.scrollTop = 0;
-};
-
 firebase.initializeApp({
   apiKey: 'AIzaSyD4rtRUXeVy8jXJzVR7PKP986sunn7jef4',
   authDomain: 'coronalert-a5911.firebaseapp.com',

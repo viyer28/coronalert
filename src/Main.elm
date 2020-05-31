@@ -731,6 +731,115 @@ header mobile searchTerm searchResults =
                 , alignTop
                 , moveDown 25
                 ]
+
+        search =
+            if mobile then
+                Element.el
+                    [ width fill
+                    , height (px 40)
+                    , Border.rounded 20
+                    , Background.color (Element.rgb 0 0 0)
+                    , Border.color (Element.rgb255 58 58 60)
+                    , Border.width 1
+                    , paddingEach { top = 0, bottom = 0, left = 24, right = 24 }
+                    , clip
+                    , Element.inFront
+                        (Element.image
+                            [ centerY
+                            , alignLeft
+                            , moveRight 15
+                            , height (px 15)
+                            ]
+                            { src = "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTS3q-vOrSdYJMUqjBY-f4SLffkAQVVXo0jCKUuSaIzIiJi4gro&usqp=CAU"
+                            , description = "search icon"
+                            }
+                        )
+                    ]
+                    (Input.text
+                        [ centerY
+                        , centerX
+                        , Font.alignLeft
+                        , height (px 30)
+                        , Background.color (Element.rgba 0 0 0 0)
+                        , width fill
+                        , Border.color (Element.rgba 0 0 0 0)
+                        , Font.size 16
+                        , Font.color (Element.rgb 1 1 1)
+                        , Element.focused
+                            [ Border.color (Element.rgba 0 0 0 0) ]
+                        , moveUp 6
+                        , Input.focusedOnLoad
+                        , onEnter
+                            (case List.head searchDisplay of
+                                Nothing ->
+                                    Noop
+
+                                Just entry ->
+                                    ClickSearch entry
+                            )
+                        ]
+                        { label = Input.labelHidden ""
+                        , onChange =
+                            \new -> Search new
+                        , placeholder =
+                            Just (Input.placeholder [ moveUp 6, Font.size 16 ] (Element.text "search a county, state, or country"))
+                        , text = searchTerm
+                        }
+                    )
+
+            else
+                Element.row
+                    [ width fill
+                    , height (px 40)
+                    , Border.rounded 20
+                    , Background.color (Element.rgb 0 0 0)
+                    , Border.color (Element.rgb255 58 58 60)
+                    , Border.width 1
+                    , spacing 15
+                    , clip
+                    , mouseOver
+                        [ Background.color
+                            (Element.rgb255 15 15 15)
+                        ]
+                    ]
+                    [ Element.image
+                        [ centerY
+                        , alignLeft
+                        , moveRight 15
+                        , height (px 15)
+                        ]
+                        { src = "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTS3q-vOrSdYJMUqjBY-f4SLffkAQVVXo0jCKUuSaIzIiJi4gro&usqp=CAU"
+                        , description = "search icon"
+                        }
+                    , Input.text
+                        [ centerY
+                        , Font.alignLeft
+                        , height (px 30)
+                        , Background.color (Element.rgba 0 0 0 0)
+                        , width fill
+                        , Border.color (Element.rgba 0 0 0 0)
+                        , Font.size 16
+                        , Font.color (Element.rgb 1 1 1)
+                        , Element.focused [ Border.color (Element.rgba 0 0 0 0) ]
+                        , moveUp 6
+                        , Input.focusedOnLoad
+                        , onEnter
+                            (case List.head searchDisplay of
+                                Nothing ->
+                                    Noop
+
+                                Just entry ->
+                                    ClickSearch entry
+                            )
+                        ]
+                        { label = Input.labelHidden ""
+                        , onChange =
+                            \new -> Search new
+                        , placeholder =
+                            Just (Input.placeholder [ moveUp 6, Font.size 16 ] (Element.text "search a county, state, or country"))
+                        , text = searchTerm
+                        }
+                    ]
     in
     Element.el
         constraints
@@ -827,59 +936,7 @@ header mobile searchTerm searchResults =
                             []
                        )
                 )
-                (Element.row
-                    [ width fill
-                    , height (px 40)
-                    , Border.rounded 20
-                    , Background.color (Element.rgb 0 0 0)
-                    , Border.color (Element.rgb255 58 58 60)
-                    , Border.width 1
-                    , spacing 15
-                    , clip
-                    , mouseOver
-                        [ Background.color
-                            (Element.rgb255 15 15 15)
-                        ]
-                    ]
-                    [ Element.image
-                        [ centerY
-                        , alignLeft
-                        , moveRight 15
-                        , height (px 15)
-                        ]
-                        { src = "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTS3q-vOrSdYJMUqjBY-f4SLffkAQVVXo0jCKUuSaIzIiJi4gro&usqp=CAU"
-                        , description = "search icon"
-                        }
-                    , Input.text
-                        [ centerY
-                        , Font.alignLeft
-                        , height (px 30)
-                        , Background.color (Element.rgba 0 0 0 0)
-                        , width fill
-                        , Border.color (Element.rgba 0 0 0 0)
-                        , Font.size 16
-                        , Font.color (Element.rgb 1 1 1)
-                        , Element.focused [ Border.color (Element.rgba 0 0 0 0) ]
-                        , moveUp 6
-                        , Input.focusedOnLoad
-                        , onEnter
-                            (case List.head searchDisplay of
-                                Nothing ->
-                                    Noop
-
-                                Just entry ->
-                                    ClickSearch entry
-                            )
-                        ]
-                        { label = Input.labelHidden ""
-                        , onChange =
-                            \new -> Search new
-                        , placeholder =
-                            Just (Input.placeholder [ moveUp 6, Font.size 16 ] (Element.text "search a county, state, or country"))
-                        , text = searchTerm
-                        }
-                    ]
-                )
+                search
             ]
         )
 
