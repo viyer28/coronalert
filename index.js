@@ -12,8 +12,8 @@ registerCustomElement({ token: token });
 var app = Elm.Main.init({
   node: document.body,
   flags: {
-    height: window.innerHeight,
-    width: window.innerWidth
+    height: document.documentElement.clientHeight,
+    width: document.documentElement.clientWidth
   }
 });
 registerPorts(app);

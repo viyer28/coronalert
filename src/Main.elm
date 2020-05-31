@@ -1756,7 +1756,7 @@ clickView mobile phoneNum validPhone invalidSub entry =
                     ++ (if mobile then
                             [ centerX
                             , alignBottom
-                            , moveUp 50
+                            , moveUp 10
                             , scale 0.8
                             ]
 
