@@ -32984,9 +32984,9 @@ var $author$project$Main$view = function (model) {
 									$mdgriffith$elm_ui$Element$inFront(
 									A4($author$project$Main$clickView, model.phoneNumber, model.validPhone, model.invalidSub, model.clickedEntry)),
 									$mdgriffith$elm_ui$Element$inFront(
-									$author$project$Main$actions(isMobile)),
-									$mdgriffith$elm_ui$Element$inFront(
 									A3($author$project$Main$header, isMobile, model.search, model.searchResults)),
+									$mdgriffith$elm_ui$Element$inFront(
+									$author$project$Main$actions(isMobile)),
 									$mdgriffith$elm_ui$Element$inFront(
 									A4($author$project$Main$premium, model.displayPremium, model.phoneNumber, model.validPhone, model.premiumSuccess)),
 									$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),

@@ -683,9 +683,9 @@ view model =
                     , Element.inFront
                         (clickView model.phoneNumber model.validPhone model.invalidSub model.clickedEntry)
                     , Element.inFront
-                        (actions isMobile)
-                    , Element.inFront
                         (header isMobile model.search model.searchResults)
+                    , Element.inFront
+                        (actions isMobile)
                     , Element.inFront
                         (premium
                             model.displayPremium
