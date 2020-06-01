@@ -1,3 +1,6 @@
+-- module View: defines views to be displayed
+
+
 module View exposing (..)
 
 import Colors exposing (..)
@@ -17,6 +20,10 @@ import Mapbox.Style as Style
 import Styles.Dark as Dark
 import Types exposing (..)
 import ViewHelpers exposing (..)
+
+
+
+-- the Coronalert title and search bar
 
 
 header : Bool -> String -> List IdRecordEntry -> Element Msg
@@ -248,6 +255,10 @@ header mobile searchTerm searchResults =
         )
 
 
+
+-- a search entry to be displayed in the search results
+
+
 searchEntry : IdRecordEntry -> Element Msg
 searchEntry entry =
     Input.button
@@ -290,6 +301,10 @@ searchEntry entry =
                     (Element.text entry.id)
                 ]
         }
+
+
+
+-- the share button and premium button for Desktop/Tablet
 
 
 actions : Element Msg
@@ -365,6 +380,10 @@ actions =
         ]
 
 
+
+-- the share button for Phone
+
+
 shareButton : Element Msg
 shareButton =
     Element.newTabLink
@@ -400,6 +419,10 @@ shareButton =
                 , description = "share button"
                 }
         }
+
+
+
+-- the premium button for Phone
 
 
 premiumButton : Element Msg
@@ -438,6 +461,10 @@ premiumButton =
                 , description = "premium button"
                 }
         }
+
+
+
+-- the Premium popup display
 
 
 premium : Bool -> Bool -> String -> Maybe Bool -> Bool -> Element Msg
@@ -613,6 +640,10 @@ premium mobile displayPremium phoneNum validPhone success =
 
     else
         Element.none
+
+
+
+-- the Premium popup display's phone number entry and success message
 
 
 premiumFooter : Bool -> String -> Maybe Bool -> List (Element Msg)
@@ -826,6 +857,10 @@ premiumFooter success phoneNum validPhone =
         ]
 
 
+
+-- the map with COVID data
+
+
 map : Model -> Html Msg
 map model =
     let
@@ -903,6 +938,10 @@ map model =
                 initialZoom
             )
         ]
+
+
+
+-- name and data displayed when hovering on a map feature
 
 
 hoverView : Maybe ( Int, Int ) -> Maybe FeatureEntry -> Element msg
@@ -988,6 +1027,10 @@ hoverView hoverPoint hoveredEntry =
             Element.none
 
 
+
+-- name to be displayed for a given feature
+
+
 titleLabel : LayerEntry -> PropertiesEntry -> ( String, String )
 titleLabel layer properties =
     case
@@ -1009,6 +1052,10 @@ titleLabel layer properties =
 
         _ ->
             ( "", "" )
+
+
+
+-- data displayed when a feature on the map is clicked on
 
 
 clickView : Bool -> String -> Maybe Bool -> Maybe Bool -> Maybe FeatureEntry -> Element Msg
@@ -1124,6 +1171,10 @@ clickView mobile phoneNum validPhone invalidSub entry =
                         ++ textView phoneNum validPhone invalidSub properties title
                     )
                 )
+
+
+
+-- the text message prompt and successful subscription message for the display shown when a feature is clicked on
 
 
 textView : String -> Maybe Bool -> Maybe Bool -> PropertiesEntry -> String -> List (Element Msg)
