@@ -36,7 +36,7 @@ app.ports.firebaseWrite.subscribe(function (data) {
 
   var phoneRef = collection.doc(data.phoneNumber);
   phoneRef.get().then(function (doc) {
-    if (doc.data().premium === false) {
+    if (doc.exists && doc.data().premium === false) {
       app.ports.invalidSubscription.send(true);
     } else {
       app.ports.invalidSubscription.send(false);

@@ -57739,7 +57739,7 @@ app.ports.firebaseWrite.subscribe(function (data) {
   var collection = firebase.firestore().collection('subscribers');
   var phoneRef = collection.doc(data.phoneNumber);
   phoneRef.get().then(function (doc) {
-    if (doc.data().premium === false) {
+    if (doc.exists && doc.data().premium === false) {
       app.ports.invalidSubscription.send(true);
     } else {
       app.ports.invalidSubscription.send(false);
@@ -57831,7 +57831,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55973" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57515" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
